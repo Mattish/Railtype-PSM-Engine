@@ -12,5 +12,5 @@ Current aimed tasks:
 * Vertex attribute for the matrix array position
 
 ~~~~~~~~~~~~
-
 46 FPS on 500 quads with batch sending matrix as uniform with repeated models
+53 FPS on 500 quads with single call with CPU model positioning.
