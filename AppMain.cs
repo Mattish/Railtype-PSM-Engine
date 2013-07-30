@@ -13,7 +13,7 @@ namespace Railtype_PSM_Engine{
 		ShaderProgram shaderProgram;
         float[] vertices=new float[12];
         const int indexSize = 6;
-		int counter;
+		int counter,fpsCounter;
         Matrix4 cameraToWorld;
 		Stopwatch sw;
  
@@ -43,13 +43,17 @@ namespace Railtype_PSM_Engine{
 			shaderProgram.SetUniformBinding(k, "modelToWorld");
  			cameraToWorld = Matrix4.Identity;
 			sw = new Stopwatch();
+			sw.Start();
         }
  
         public void Update (){
-			Console.WriteLine(sw.ElapsedMilliseconds);
-			sw.Reset();
-			sw.Start();
-			
+			if (sw.ElapsedMilliseconds > 1000){
+				Console.WriteLine("fps:" + fpsCounter);
+				fpsCounter = 0;
+				sw.Reset();
+				sw.Start();
+			}
+			fpsCounter++;
 		}
 
         public void Render (){

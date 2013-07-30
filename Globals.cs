@@ -10,7 +10,7 @@ namespace Railtype_PSM_Engine{
 		public static int vertexSize;
 		public static VertexBuffer modelVertexBuffer;
 		static private GraphicsContext _graphic;
-		static int counter;
+		static int drawCounter;
 		static public void Setup(GraphicsContext graphic){
 			_graphic = graphic;
 			float[] vertices = new float[9];
@@ -27,33 +27,43 @@ namespace Railtype_PSM_Engine{
             vertices[8]=0.0f;   // z2
 			
 			things = new List<Thing>(100);
-			for(int i = 0; i < 20;i++){
+			for(int i = 0; i < 1000;i++){
 				things.Add(new Thing(vertices,i));
 			}
 		}
 		
 		static public void DoDrawing(ref GraphicsContext gc, ref ShaderProgram shaderProgram){
-			Primitive[] tmp = PackModelVertexBuffer(ref gc, ref shaderProgram); // THE FIRST 10 TEST
-			gc.DrawArrays(tmp,0,10); // THE FIRST 10 TEST
+			drawCounter = 0;
+			Primitive[] primArray;
+			int primAmount = 0;
+			while ((primAmount = PackModelVertexBuffer(ref gc, ref shaderProgram, out primArray)) > 0){
+				gc.DrawArrays(primArray,0,primAmount);
+			}
+			
 		}
 		
-		static Primitive[] PackModelVertexBuffer(ref GraphicsContext gc, ref ShaderProgram shaderProgram){
-			Primitive[] prims = new Primitive[10];
-			float[] vertex;
-			Matrix4[] matrixUniform = new Matrix4[10];
-			float[] matrixNumber;
-			int amountOfVertex = 0, matrixCounter = 0, position = 0;
+		static int PackModelVertexBuffer(ref GraphicsContext gc, ref ShaderProgram shaderProgram, out Primitive[] input){
+			input = new Primitive[11];
 			
-			for(int i = 0; i < 10;i++){ // How many vertex THE FIRST 10
+			if (drawCounter == things.Count)
+				return 0;
+			float[] vertex;
+			Matrix4[] matrixUniform = new Matrix4[11];
+			float[] matrixNumber;
+			int amountOfVertex = 0, matrixCounter = 0, position = 0, HowManyWeGot = 0;
+			for(int i = drawCounter; i < things.Count;i++){ 
 				amountOfVertex += things[i].VertexCount;
-				matrixUniform[i] = things[i].modelToWorld;
+				matrixUniform[i-drawCounter] = things[i].modelToWorld;
+				HowManyWeGot++;
+				if (HowManyWeGot == 10)
+					break;
 			}
 			int k = shaderProgram.FindUniform("modelToWorld");
-			shaderProgram.SetUniformValue(k,matrixUniform,0,0,10);
+			shaderProgram.SetUniformValue(k,matrixUniform,0,0,HowManyWeGot);
 			
 			vertex = new float[amountOfVertex*3];
 			matrixNumber = new float[amountOfVertex];
-			for(int i = 0; i < 10;i++){ // Now for each, put them into the arrays THE FIRST 10
+			for(int i = drawCounter; i < (drawCounter+HowManyWeGot);i++){ // Now for each, put them into the arrays THE FIRST 10
 				things[i].PutModelVertexIntoArray(ref vertex,(position*3)); // For verticies
 				
 				for(int j = position; j < (position+things[i].VertexCount);j++){ // for matrixnumber
@@ -61,7 +71,7 @@ namespace Railtype_PSM_Engine{
 				}
 				
 				matrixCounter++;
-				prims[i] = new Primitive(DrawMode.Triangles,position,things[i].VertexCount,0);
+				input[i-drawCounter] = new Primitive(DrawMode.Triangles,position,things[i].VertexCount,0);
 				position += (things[i].VertexCount);
 			}			
 			
@@ -69,7 +79,8 @@ namespace Railtype_PSM_Engine{
             modelVertexBuffer.SetVertices(0, vertex);
 			modelVertexBuffer.SetVertices(1, matrixNumber);
             gc.SetVertexBuffer(0, modelVertexBuffer);
-			return prims;
+			drawCounter += HowManyWeGot;
+			return HowManyWeGot;
 		}
 		
 	}

@@ -54,11 +54,4 @@
     <Folder Include="resources\" />
     <Folder Include="Entities\" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="resources\Player.png">
-      <Gettext-ScanForTranslations>false</Gettext-ScanForTranslations>
-      <DeployService-Deploy>true</DeployService-Deploy>
-      <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
-    </Content>
-  </ItemGroup>
 </Project>
