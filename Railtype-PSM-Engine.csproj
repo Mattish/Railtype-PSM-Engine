@@ -39,8 +39,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppMain.cs" />
-    <Compile Include="Thing.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="Entities\Thing.cs" />
   </ItemGroup>
   <ItemGroup>
     <ShaderProgram Include="shaders\Basic.fcg" />
@@ -52,6 +52,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Sce\Sce.Psm.CSharp.targets" />
   <ItemGroup>
     <Folder Include="resources\" />
+    <Folder Include="Entities\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="resources\Player.png">
