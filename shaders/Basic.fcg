@@ -1,7 +1,7 @@
 
 void main( float4 out Color : COLOR,
-		   float in colorTest : TEXCOORD2
+			float in inputColor : TEXCOORD2
 		   )
 {
-	Color = float4(colorTest,0.0f,1.0f,1.0f);
+	Color = float4(inputColor,0.0f,1.0f,1.0f);
 }

@@ -6,81 +6,85 @@ using Railtype_PSM_Engine.Entities;
 
 namespace Railtype_PSM_Engine{
 	public static class Globals{
+		
+		public static int AmountPerPush = 10;
+		
 		public static List<Thing> things;
 		public static int vertexSize;
 		public static VertexBuffer modelVertexBuffer;
 		static private GraphicsContext _graphic;
-		static int drawCounter;
+		public static Matrix4 ViewProjection;
 		static public void Setup(GraphicsContext graphic){
 			_graphic = graphic;
-			float[] vertices = new float[9];
-            vertices[0]=0.0f;   // x0
-            vertices[1]=0.0f;   // y0
-            vertices[2]=0.0f;   // z0
+			float[] vertices = new float[18];
+            vertices[0]=0.0f;   // 0
+            vertices[1]=0.0f;   
+            vertices[2]=0.0f;   
  
-            vertices[3]=0.0f;   // x1
-            vertices[4]=1.0f;   // y1
-            vertices[5]=0.0f;   // z1
+            vertices[3]=0.0f;   // 1
+            vertices[4]=1.0f;   
+            vertices[5]=0.0f;   
  
-            vertices[6]=1.0f;   // x2
-            vertices[7]=0.0f;   // y2
-            vertices[8]=0.0f;   // z2
+            vertices[6]=1.0f;   // 2
+            vertices[7]=0.0f;   
+            vertices[8]=0.0f;   
+			// -----------------
+			vertices[9]=0.0f;   // 1
+            vertices[10]=1.0f;   
+            vertices[11]=0.0f;   
+ 
+            vertices[12]=1.0f;   // 2
+            vertices[13]=0.0f;   
+            vertices[14]=0.0f;   
 			
-			things = new List<Thing>(100);
-			for(int i = 0; i < 1000;i++){
+			vertices[15]=1.0f;   // 3
+            vertices[16]=1.0f;   
+            vertices[17]=0.0f;   
+			
+			things = new List<Thing>(23);
+			for(int i = 0; i < 500;i++){
 				things.Add(new Thing(vertices,i));
 			}
 		}
 		
 		static public void DoDrawing(ref GraphicsContext gc, ref ShaderProgram shaderProgram){
-			drawCounter = 0;
+			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 			Primitive[] primArray;
-			int primAmount = 0;
-			while ((primAmount = PackModelVertexBuffer(ref gc, ref shaderProgram, out primArray)) > 0){
-				gc.DrawArrays(primArray,0,primAmount);
-			}
+			Matrix4[] matriciesToPush = PackModelVertexBuffer(ref gc, ref shaderProgram, out primArray);
+			sw.Start();
 			
+			//int k = shaderProgram.FindUniform("modelToWorld");
+			//shaderProgram.SetUniformValue(k,matriciesToPush,0,matriciesToPush.Length,matriciesToPush.Length);
+			gc.DrawArrays(primArray,0,primArray.Length);
+			modelVertexBuffer.Dispose();
+			
+			sw.Stop();
+			//Console.WriteLine("Draw/dispose loop took:" + sw.ElapsedMilliseconds + "ms");
 		}
 		
-		static int PackModelVertexBuffer(ref GraphicsContext gc, ref ShaderProgram shaderProgram, out Primitive[] input){
-			input = new Primitive[11];
-			
-			if (drawCounter == things.Count)
-				return 0;
+		static Matrix4[] PackModelVertexBuffer(ref GraphicsContext gc, ref ShaderProgram shaderProgram, out Primitive[] input){
 			float[] vertex;
-			Matrix4[] matrixUniform = new Matrix4[11];
-			float[] matrixNumber;
+			Matrix4[] matrixUniform = new Matrix4[things.Count];
+			input = new Primitive[things.Count];
 			int amountOfVertex = 0, matrixCounter = 0, position = 0, HowManyWeGot = 0;
-			for(int i = drawCounter; i < things.Count;i++){ 
+			for(int i = 0; i < things.Count;i++){ 
 				amountOfVertex += things[i].VertexCount;
-				matrixUniform[i-drawCounter] = things[i].modelToWorld;
+				matrixUniform[i] = things[i].modelToWorld;
 				HowManyWeGot++;
-				if (HowManyWeGot == 10)
-					break;
 			}
-			int k = shaderProgram.FindUniform("modelToWorld");
-			shaderProgram.SetUniformValue(k,matrixUniform,0,0,HowManyWeGot);
 			
 			vertex = new float[amountOfVertex*3];
-			matrixNumber = new float[amountOfVertex];
-			for(int i = drawCounter; i < (drawCounter+HowManyWeGot);i++){ // Now for each, put them into the arrays THE FIRST 10
+			for(int i = 0; i < things.Count;i++){ // Now for each, put them into the arrays
 				things[i].PutModelVertexIntoArray(ref vertex,(position*3)); // For verticies
 				
-				for(int j = position; j < (position+things[i].VertexCount);j++){ // for matrixnumber
-					matrixNumber[j] = matrixCounter;
-				}
-				
 				matrixCounter++;
-				input[i-drawCounter] = new Primitive(DrawMode.Triangles,position,things[i].VertexCount,0);
+				input[i] = new Primitive(DrawMode.Triangles,position,things[i].VertexCount,0);
 				position += (things[i].VertexCount);
 			}			
-			
-            modelVertexBuffer = new VertexBuffer(amountOfVertex, VertexFormat.Float3,VertexFormat.Float);
+            modelVertexBuffer = new VertexBuffer(amountOfVertex, VertexFormat.Float3);
             modelVertexBuffer.SetVertices(0, vertex);
-			modelVertexBuffer.SetVertices(1, matrixNumber);
             gc.SetVertexBuffer(0, modelVertexBuffer);
-			drawCounter += HowManyWeGot;
-			return HowManyWeGot;
+			return matrixUniform;
 		}
 		
 	}
