@@ -10,3 +10,7 @@ This is a side project and currently not anything serious. Mainly wanting to loo
 Current aimed tasks:
 * Batch modelToWorld matrix calls for each entity to the shader in X amounts(10 is doable with some uniform room left).
 * Vertex attribute for the matrix array position
+
+~~~~~~~~~~~~
+
+46 FPS on 500 quads with batch sending matrix as uniform with repeated models
