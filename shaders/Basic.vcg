@@ -1,0 +1,13 @@
+
+void main( float4 in a_Position  : POSITION,
+		   float4 out v_Position : POSITION,
+		   float3 in idontgetit : TEXCOORD1,		   
+		   float3 out idontgetitOK : TEXCOORD1,		   
+		   uniform float4x4 WorldViewProj,
+		   uniform float4x4 TestMovement
+		   )
+{
+	idontgetitOK = idontgetit;
+	float4x4 tmp = mul( WorldViewProj, TestMovement );
+	v_Position = mul( tmp, a_Position );
+}

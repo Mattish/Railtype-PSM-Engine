@@ -1,0 +1,7 @@
+
+void main( float4 out Color : COLOR,
+		   float3 in idontgetitOK : TEXCOORD1,
+		   uniform float4 inputColor)
+{
+	Color = float4(idontgetitOK,1.0f);
+}
