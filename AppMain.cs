@@ -13,12 +13,13 @@ namespace Railtype_PSM_Engine{
 		ShaderProgram shaderProgram;
         float[] vertices=new float[12];
         const int indexSize = 6;
-        Matrix4 cameraToWorld, modelToWorld;
+		int counter;
+        Matrix4 cameraToWorld;
 		Stopwatch sw;
  
         public static void Main (string[] args){
 			AppMain appmain = new AppMain();
-            appmain. Initialize ();
+            appmain.Initialize ();
  
             while (true) {
                 SystemEvents.CheckEvents();
@@ -31,11 +32,15 @@ namespace Railtype_PSM_Engine{
             graphics = new GraphicsContext();
 			Globals.Setup(graphics);
             shaderProgram = new ShaderProgram("/Application/shaders/Basic.cgx");
-			shaderProgram.SetAttributeBinding(0, "a_Position");
-			shaderProgram.SetAttributeBinding(1, "idontgetit");
-            shaderProgram.SetUniformBinding(0, "WorldViewProj");
-			shaderProgram.SetUniformBinding(1, "inputColor");
-			shaderProgram.SetUniformBinding(2, "TestMovement");
+			int k = shaderProgram.FindAttribute("a_Position");
+			shaderProgram.SetAttributeBinding(k, "a_Position");
+			k = shaderProgram.FindAttribute("matrixNumber");
+			shaderProgram.SetAttributeBinding(k, "matrixNumber");
+			
+			k = shaderProgram.FindUniform("WorldViewProj");
+            shaderProgram.SetUniformBinding(k, "WorldViewProj");
+			k = shaderProgram.FindUniform("modelToWorld");
+			shaderProgram.SetUniformBinding(k, "modelToWorld");
  			cameraToWorld = Matrix4.Identity;
 			sw = new Stopwatch();
         }
@@ -46,25 +51,18 @@ namespace Railtype_PSM_Engine{
 			sw.Start();
 			
 		}
-		
-		int counter;
+
         public void Render (){
 			graphics.SetClearColor (1.0f, 1.0f, 1.0f, 1.0f);
             graphics.Clear();
             graphics.SetShaderProgram(shaderProgram);
-			
-			modelToWorld = Matrix4.Identity;		
-			modelToWorld *= Matrix4.RotationY((float)(Math.PI/60.0f)*counter);
-			modelToWorld.RowW = modelToWorld.RowW.Add(new Vector4(0.0f,0.0f,-3.0f,0.0f));				
+							
 			counter++;
-			Matrix4 VP = buildProjectionMatrix(ref cameraToWorld);
+			Matrix4 VP = buildProjectionMatrix(ref cameraToWorld); // Build camera to world projection
 			
-            shaderProgram.SetUniformValue(0, ref VP);
-			float[] inputColor = new float[]{1.0f,0.0f,1.0f,1.0f};
-			shaderProgram.SetUniformValue(1, inputColor);			
-			shaderProgram.SetUniformValue(2, ref modelToWorld);
+            shaderProgram.SetUniformValue(0, ref VP);			
 			
-            graphics.DrawArrays(Globals._prims);
+            Globals.DoDrawing(ref graphics, ref shaderProgram);
             graphics.SwapBuffers();
         }
 		

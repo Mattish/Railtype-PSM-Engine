@@ -11,6 +11,7 @@ TestResults
 
 # MonoDevelop artifacts
 *.pidb
+app.xml
 *.userprefs
 test-results
 
