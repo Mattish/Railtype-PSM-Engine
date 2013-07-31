@@ -16,8 +16,24 @@ These are run on the device(vita) in release mode.
 ~~~~~~~~~~~~
 A quad here being 18 vertex.
 
-46 FPS on 500 quads with batch sending matrix as uniform
-53 FPS on 500 quads with single call with CPU model positioning
+CPU-based(single call with CPU model positioning)
+53 FPS 500 quads 
+43 FPS 500 2quads(36 vertex)
 
-27 FPS on 500 2quads with batch sending matrix as uniform
-43 FPS on 500 2quads with single call with CPU model positioning
+GPU-based(batch sending matrix as uniform in 10s)
+46 FPS on 500 quads 
+27 FPS on 500 2quads
+
+With random models
+
+CPU-based:
+19fps 500 random model of 50 vertex each
+22fps 250 random model of 100 vertex each
+12fps 100 random model of 500 vertex each
+24fps 100 random model of 250 vertex each
+
+GPU-based:
+20fps 500 random model of 50 vertex each
+24fps 250 random model of 100 vertex each
+15fps 100 random model of 500 vertex each
+29fps 100 random model of 250 vertex each

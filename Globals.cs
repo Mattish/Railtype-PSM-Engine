@@ -18,9 +18,9 @@ namespace Railtype_PSM_Engine{
 		static public void Setup(GraphicsContext graphic){
 			_graphic = graphic;
 			random = new Random();
-			things = new List<Thing>(23);
-			for(int i = 0; i < 500;i++){
-				things.Add(new Thing(50,i));
+			things = new List<Thing>(100);
+			for(int i = 0; i < 100;i++){
+				things.Add(new Thing(250,i));
 			}
 		}
 		
