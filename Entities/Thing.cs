@@ -36,9 +36,20 @@ namespace Railtype_PSM_Engine.Entities{
 			var1 = 0.0f;
 		}
 		
+		public Thing(int amountOfVertex, int input){
+			modelVertex = new float[amountOfVertex*3];
+			VertexCount = amountOfVertex;
+			number = input;
+			for(int i = 0; i < modelVertex.Length; i+=3){
+				modelVertex[i] = (float)Globals.random.NextDouble();
+				modelVertex[i+1] = (float)Globals.random.NextDouble();
+				modelVertex[i+2] = (float)Globals.random.NextDouble();
+			}
+		}
+		
 		public void update(){
 			modelToWorld = Matrix4.Identity;
-			modelToWorld *= Matrix4.RotationZ(1f);			
+			modelToWorld *= Matrix4.RotationZ(var1);			
 			modelToWorld.ColumnW = modelToWorld.ColumnW.Add(new Vector4(0.05f*number,0.0f,-5.0f,0.0f));
 			var1+= 0.005f;
 		}
