@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Railtype_PSM_Engine.Entities;
 using Sce.PlayStation.Core;
 using Sce.PlayStation.Core.Environment;
 using Sce.PlayStation.Core.Graphics;
@@ -54,6 +55,10 @@ namespace Railtype_PSM_Engine{
 				sw.Start();
 			}
 			fpsCounter++;
+			
+			foreach(Thing thing in Globals.things){
+				thing.update();		
+			}
 		}
 
         public void Render (){

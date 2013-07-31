@@ -10,6 +10,7 @@ namespace Railtype_PSM_Engine.Entities{
 		float[] modelVertex;
 		public int VertexCount;
 		public Matrix4 modelToWorld;
+		float var1;
 			
 		public Thing (){
 			VertexCount = 0;
@@ -29,6 +30,14 @@ namespace Railtype_PSM_Engine.Entities{
 			VertexCount = model.Length;
 			modelToWorld = Matrix4.Identity;
 			modelToWorld.RowW = modelToWorld.RowW.Add(new Vector4(0.2f*input,0.0f,-2.0f,0.0f));
+			var1 = 0.0f;
+		}
+		
+		public void update(){
+			var1 += 0.005f;
+			modelToWorld = Matrix4.Identity;
+			modelToWorld.RowW = modelToWorld.RowW.Add(new Vector4(0.2f,0.0f,-2.0f,0.0f));
+			modelToWorld *= Matrix4.RotationZ(var1);
 		}
 		
 		public void PutModelVertexIntoArray(ref float[] input, int position){

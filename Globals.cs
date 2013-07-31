@@ -14,7 +14,7 @@ namespace Railtype_PSM_Engine{
 		static private GraphicsContext _graphic;
 		static public void Setup(GraphicsContext graphic){
 			_graphic = graphic;
-			float[] vertices = new float[18];
+			float[] vertices = new float[36];
             vertices[0]=0.0f;   // 0
             vertices[1]=0.0f;   
             vertices[2]=0.0f;   
@@ -39,6 +39,30 @@ namespace Railtype_PSM_Engine{
             vertices[16]=1.0f;   
             vertices[17]=0.0f;
 			
+			vertices[18]=-1.0f;   // 4
+            vertices[19]=-1.0f;   
+            vertices[20]=-1.0f;   
+ 
+            vertices[21]=-1.0f;   // 5
+            vertices[22]=0.0f;   
+            vertices[23]=-1.0f;   
+ 
+            vertices[24]=0.0f;   // 6
+            vertices[25]=-1.0f;   
+            vertices[26]=-1.0f;   
+			// -----------------
+			vertices[27]=-1.0f;   // 5
+            vertices[28]=0.0f;   
+            vertices[29]=-1.0f;   
+ 
+            vertices[30]=0.0f;   // 6
+            vertices[31]=-1.0f;   
+            vertices[32]=-1.0f;   
+
+			vertices[33]=0.0f;   // 7
+            vertices[34]=0.0f;   
+            vertices[35]=-1.0f;
+			
 			things = new List<Thing>(100);
 			for(int i = 0; i < 500;i++){
 				things.Add(new Thing(vertices,i));
@@ -58,6 +82,7 @@ namespace Railtype_PSM_Engine{
 				gc.DrawArrays(primArray,primCounter,HowManyToPush);
 				primCounter += HowManyToPush;
 			}
+			modelVertexBuffer.Dispose();
 			
 		}
 		
