@@ -46,12 +46,12 @@
     <ShaderProgram Include="shaders\Basic.fcg" />
     <ShaderProgram Include="shaders\Basic.vcg" />
   </ItemGroup>
-  <ItemGroup>
-    <PsmMetadata Include="app.xml" />
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Sce\Sce.Psm.CSharp.targets" />
   <ItemGroup>
     <Folder Include="resources\" />
     <Folder Include="Entities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PsmMetadata Include="app.xml" />
   </ItemGroup>
 </Project>
