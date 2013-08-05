@@ -10,33 +10,27 @@ namespace Railtype_PSM_Engine.Entities{
 		float[] modelVertex;
 		public int VertexCount;
 		public Matrix4 modelToWorld;
-		float var1;
 		int number;
 			
 		public Thing (){
-			VertexCount = 0;
 			modelToWorld = Matrix4.Identity;
-			modelToWorld.RowW = modelToWorld.RowW.Add(new Vector4(0.0f,0.0f,-1.0f,0.0f));
+			scalex = scaley = scalez = 1.0f;
+			x = y = z = rotx = roty = rotz = 0.0f;
 		}
 		
-		public Thing(float[] model){
+		public Thing(float[] model) : this(){
 			modelVertex = model;
 			VertexCount = model.Length/3;
-			modelToWorld = Matrix4.Identity;
-			modelToWorld.RowW = modelToWorld.RowW.Add(new Vector4(0.0f,0.0f,-1.0f,0.0f));
 		}
 		
-		public Thing(float[] model, int input){
+		public Thing(float[] model, int input) : this(){
 			number = input;
 			modelVertex = model;
 			VertexCount = model.Length/3;
 			modelToWorld = Matrix4.Identity;
-			//modelToWorld *= Matrix4.RotationX(0.75f);
-			modelToWorld.ColumnW = modelToWorld.ColumnW.Add(new Vector4(0.2f*input,0.0f,-2.0f,0.0f));
-			var1 = 0.0f;
 		}
 		
-		public Thing(int amountOfVertex, int input){
+		public Thing(int amountOfVertex, int input) : this(){
 			modelVertex = new float[amountOfVertex*3];
 			VertexCount = amountOfVertex;
 			number = input;
@@ -49,9 +43,11 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public void update(){
 			modelToWorld = Matrix4.Identity;
-			modelToWorld *= Matrix4.RotationZ(var1);			
-			modelToWorld.ColumnW = modelToWorld.ColumnW.Add(new Vector4(0.05f*number,0.0f,-5.0f,0.0f));
-			var1+= 0.005f;
+			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
+			//modelToWorld.ColumnW = modelToWorld.ColumnW.Add(new Vector4(0.05f*number,0.0f,-5.0f,0.0f));
+			modelToWorld.ColumnW = new Vector4(x,y,z,modelToWorld.ColumnW.W);
+			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
+			roty += 0.005f;
 		}
 		
 		public void PutModelVertexIntoArray(ref float[] input, int position){
