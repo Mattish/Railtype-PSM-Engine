@@ -12,6 +12,9 @@ This is a side project and currently not anything serious. Mainly wanting to loo
 * Vertex attribute for the matrix array position
 * Aiming for something with complex models or lots of small simple ones
 
+as per https://psm.playstation.net/static/general/dev/en/sdk_docs/overview_graphics_en.html ; "MaxVertexUniformVectors 128"
+So cant push more then maybe 10 matrix per draw call even with a simple shader.
+
 These are run on the device(vita) in release mode.
 ~~~~~~~~~~~~
 A quad here being 18 vertex.
@@ -38,3 +41,4 @@ GPU-based:
 24fps 250 random model of 100 vertex each
 15fps 100 random model of 500 vertex each
 29fps 100 random model of 250 vertex each
+
