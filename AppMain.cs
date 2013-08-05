@@ -11,11 +11,9 @@ using Sce.PlayStation.Core.Imaging;
 namespace Railtype_PSM_Engine{
 	public class AppMain{
 		private GraphicsContext graphics;
-		ShaderProgram shaderProgram;
         float[] vertices=new float[12];
         const int indexSize = 6;
 		int counter,fpsCounter;
-        Matrix4 cameraToWorld;
 		Stopwatch sw;
  
         public static void Main (string[] args){
@@ -32,17 +30,25 @@ namespace Railtype_PSM_Engine{
         public void Initialize (){
             graphics = new GraphicsContext();
 			Globals.Setup(graphics);
-            shaderProgram = new ShaderProgram("/Application/shaders/Basic.cgx");
-			int k = shaderProgram.FindAttribute("a_Position");
-			shaderProgram.SetAttributeBinding(k, "a_Position");
-			k = shaderProgram.FindAttribute("matrixNumber");
-			shaderProgram.SetAttributeBinding(k, "matrixNumber");
+            Globals.cpu = new ShaderProgram("/Application/shaders/cpu.cgx");
+			Globals.gpu = new ShaderProgram("/Application/shaders/gpu.cgx");
+			int k = Globals.cpu.FindAttribute("a_Position");
+			Globals.cpu.SetAttributeBinding(k, "a_Position");
+			k = Globals.gpu.FindAttribute("a_Position");
+			Globals.gpu.SetAttributeBinding(k, "a_Position");			
 			
-			k = shaderProgram.FindUniform("WorldViewProj");
-            shaderProgram.SetUniformBinding(k, "WorldViewProj");
-			k = shaderProgram.FindUniform("modelToWorld");
-			shaderProgram.SetUniformBinding(k, "modelToWorld");
- 			cameraToWorld = Matrix4.Identity;
+			
+			k = Globals.gpu.FindAttribute("matrixNumber");
+			Globals.gpu.SetAttributeBinding(k, "matrixNumber");
+			
+			k = Globals.gpu.FindUniform("WorldViewProj");
+            Globals.gpu.SetUniformBinding(k, "WorldViewProj");
+			k = Globals.cpu.FindUniform("WorldViewProj");
+            Globals.cpu.SetUniformBinding(k, "WorldViewProj");
+			
+			
+			k = Globals.gpu.FindUniform("modelToWorld");
+			Globals.gpu.SetUniformBinding(k, "modelToWorld");
 			sw = new Stopwatch();
 			sw.Start();
         }
@@ -64,24 +70,13 @@ namespace Railtype_PSM_Engine{
         public void Render (){
 			graphics.SetClearColor (1.0f, 1.0f, 1.0f, 1.0f);
             graphics.Clear();
-            graphics.SetShaderProgram(shaderProgram);
 							
 			counter++;
-			Matrix4 VP = buildProjectionMatrix(ref cameraToWorld); // Build camera to world projection
 			
-            shaderProgram.SetUniformValue(0, ref VP);			
-			
-            Globals.DoDrawing(ref graphics, ref shaderProgram);
+            Globals.DoDrawing(ref graphics);
             graphics.SwapBuffers();
         }
-		
-		public Matrix4 buildProjectionMatrix(ref Matrix4 cameraToWorld){
-			Matrix4 worldToCamera = Matrix4.Identity;
-			cameraToWorld.Inverse(out worldToCamera);
-			Matrix4 cameraToProjection = Matrix4.Perspective(FMath.Radians(45.0f), graphics.Screen.AspectRatio, 1.0f, 1000.0f);
-			Matrix4 tmp = worldToCamera * cameraToProjection;
-			return tmp;
-		}
+	
 		
     }
 }

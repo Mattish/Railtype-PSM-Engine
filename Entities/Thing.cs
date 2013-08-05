@@ -42,28 +42,40 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public void update(){
+			z = -10.0f;
 			modelToWorld = Matrix4.Identity;
 			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
-			//modelToWorld.ColumnW = modelToWorld.ColumnW.Add(new Vector4(0.05f*number,0.0f,-5.0f,0.0f));
 			modelToWorld.ColumnW = new Vector4(x,y,z,modelToWorld.ColumnW.W);
 			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
-			roty += 0.005f;
+			roty = rotz += 0.005f;
+		}
+		
+		public Matrix4 getModelToWorld(){
+			z = -10.0f;
+			modelToWorld = Matrix4.Identity;
+			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
+			modelToWorld.ColumnW = new Vector4(x,y,z,modelToWorld.ColumnW.W);
+			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
+			return modelToWorld;
 		}
 
 		public void PutModelVertexIntoArray(ref float[] input, int position){
-			Vector4 tmpv = new Vector4(0,0,0,1); // Working out positions on CPU rather then passing matrix
-			Vector4 result = new Vector4(0,0,0,1);
-			for(int i = 0; i < modelVertex.Length; i+=3 ){
-				tmpv.X = modelVertex[i];
-				tmpv.Y = modelVertex[i+1];
-				tmpv.Z = modelVertex[i+2];
-				result = modelToWorld.Transform(tmpv);
-				input[position+i] = result.X;
-				input[position+i+1] = result.Y;
-				input[position+i+2] = result.Z;
+			if (Globals.CPU_CALCULATION){
+				Vector4 tmpv = new Vector4(0,0,0,1);
+				Vector4 result = new Vector4(0,0,0,1);
+				for(int i = 0; i < modelVertex.Length; i+=3 ){
+					tmpv.X = modelVertex[i];
+					tmpv.Y = modelVertex[i+1];
+					tmpv.Z = modelVertex[i+2];
+					result = modelToWorld.Transform(tmpv);
+					input[position+i] = result.X;
+					input[position+i+1] = result.Y;
+					input[position+i+2] = result.Z;
+				}
 			}
-
-			//Array.Copy(modelVertex,0,input,position,modelVertex.Length); 	Old method
+			else{
+				Array.Copy(modelVertex,0,input,position,modelVertex.Length); 
+			}
 		}
 
 	}

@@ -43,8 +43,10 @@
     <Compile Include="Entities\Thing.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ShaderProgram Include="shaders\Basic.fcg" />
-    <ShaderProgram Include="shaders\Basic.vcg" />
+    <ShaderProgram Include="shaders\cpu.vcg" />
+    <ShaderProgram Include="shaders\cpu.fcg" />
+    <ShaderProgram Include="shaders\gpu.fcg" />
+    <ShaderProgram Include="shaders\gpu.vcg" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Sce\Sce.Psm.CSharp.targets" />
   <ItemGroup>
