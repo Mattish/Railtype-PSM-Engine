@@ -30,10 +30,11 @@ namespace Railtype_PSM_Engine{
         public void Initialize (){
             graphics = new GraphicsContext();
 			Globals.Setup(graphics);
+			Globals.gpu = new ShaderProgram("/Application/shaders/gpu.cgx");			
             Globals.cpu = new ShaderProgram("/Application/shaders/cpu.cgx");
-			Globals.gpu = new ShaderProgram("/Application/shaders/gpu.cgx");
 			int k = Globals.cpu.FindAttribute("a_Position");
 			Globals.cpu.SetAttributeBinding(k, "a_Position");
+			
 			k = Globals.gpu.FindAttribute("a_Position");
 			Globals.gpu.SetAttributeBinding(k, "a_Position");			
 			
@@ -43,6 +44,7 @@ namespace Railtype_PSM_Engine{
 			
 			k = Globals.gpu.FindUniform("WorldViewProj");
             Globals.gpu.SetUniformBinding(k, "WorldViewProj");
+			
 			k = Globals.cpu.FindUniform("WorldViewProj");
             Globals.cpu.SetUniformBinding(k, "WorldViewProj");
 			

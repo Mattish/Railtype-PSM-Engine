@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core;
+using Railtype_PSM_Engine;
 
 namespace Railtype_PSM_Engine.Entities{
 	public class Thing{
@@ -42,20 +43,18 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public void update(){
-			z = -10.0f;
-			modelToWorld = Matrix4.Identity;
-			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
-			modelToWorld.ColumnW = new Vector4(x,y,z,modelToWorld.ColumnW.W);
-			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
-			roty = rotz += 0.005f;
+			z = -5.0f;
+			getModelToWorld();
+			rotx = roty += 0.005f;
 		}
 		
 		public Matrix4 getModelToWorld(){
-			z = -10.0f;
-			modelToWorld = Matrix4.Identity;
+			modelToWorld = Matrix4.Identity;			
 			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
-			modelToWorld.ColumnW = new Vector4(x,y,z,modelToWorld.ColumnW.W);
 			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
+			modelToWorld.RowW = new Vector4(x,y,z,modelToWorld.RowW.W);		
+			if(Globals.CPU_CALCULATION)
+				modelToWorld = modelToWorld.Transpose();
 			return modelToWorld;
 		}
 
@@ -67,7 +66,7 @@ namespace Railtype_PSM_Engine.Entities{
 					tmpv.X = modelVertex[i];
 					tmpv.Y = modelVertex[i+1];
 					tmpv.Z = modelVertex[i+2];
-					result = modelToWorld.Transform(tmpv);
+					result = getModelToWorld().Transform(tmpv);
 					input[position+i] = result.X;
 					input[position+i+1] = result.Y;
 					input[position+i+2] = result.Z;

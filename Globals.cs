@@ -9,7 +9,8 @@ namespace Railtype_PSM_Engine{
 	public static class Globals{
 
 		public static int AmountPerPush = 10;
-		public static readonly bool CPU_CALCULATION = false;
+		public static bool CPU_CALCULATION = false;
+		public static int frameCount;
 		public static ShaderProgram cpu, gpu;
         public static Matrix4 cameraToWorld;
 		public static List<Thing> things;
@@ -19,6 +20,7 @@ namespace Railtype_PSM_Engine{
 		public static Matrix4 ViewProjection;
 		public static Random random;
 		static public void Setup(GraphicsContext graphic){
+			frameCount = 0;
 			_graphic = graphic;
 			random = new Random();
 			things = new List<Thing>(100);
@@ -47,7 +49,7 @@ namespace Railtype_PSM_Engine{
 			}
 
 
-			for(int i = 0; i < 1;i++){
+			for(int i = 0; i < 100;i++){
 				things.Add(new Thing(cubevertex,i));
 			}
 		}
@@ -58,23 +60,23 @@ namespace Railtype_PSM_Engine{
 			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 			Primitive[] primArray;
 			sw.Start();
-			Matrix4[] matriciesToPush;
+			Matrix4[] matriciesToPush = PackModelVertexBuffer(ref gc, out primArray);
 			if (Globals.CPU_CALCULATION){
-				matriciesToPush = PackModelVertexBuffer(ref gc, ref cpu, out primArray);
 	            gc.SetShaderProgram(cpu);						
 	            cpu.SetUniformValue(0, ref VP);				
 				gc.DrawArrays(primArray,0,primArray.Length);
 					
 			}
 			else if (!Globals.CPU_CALCULATION){ // Pushing Matricies to shader as uniform
-				matriciesToPush = PackModelVertexBuffer(ref gc, ref gpu, out primArray);
-	            gc.SetShaderProgram(gpu);						
-	            gpu.SetUniformValue(0, ref VP);
+	            gc.SetShaderProgram(gpu);
+				//WorldViewProj
+				int k = gpu.FindUniform("WorldViewProj");
+	            gpu.SetUniformValue(k, ref VP);
 				
 				int primCounter = 0, HowManyToPush = 0;
 				while (primCounter < primArray.Length){
 					HowManyToPush = primArray.Length - primCounter > 10 ? 10 : primArray.Length - primCounter;
-					int k = gpu.FindUniform("modelToWorld");
+					k = gpu.FindUniform("modelToWorld");
 					gpu.SetUniformValue(k,matriciesToPush,0,primCounter,HowManyToPush);			
 					gc.DrawArrays(primArray,primCounter,HowManyToPush);
 					primCounter += HowManyToPush;
@@ -83,9 +85,12 @@ namespace Railtype_PSM_Engine{
 			modelVertexBuffer.Dispose();
 			sw.Stop();
 			//Console.WriteLine("Draw/dispose loop took:" + sw.ElapsedMilliseconds + "ms");
+			frameCount++;
+			if (frameCount % 120 == 0)
+				CPU_CALCULATION = !CPU_CALCULATION;
 		}
 
-		static Matrix4[] PackModelVertexBuffer(ref GraphicsContext gc, ref ShaderProgram shaderProgram, out Primitive[] input){
+		static Matrix4[] PackModelVertexBuffer(ref GraphicsContext gc, out Primitive[] input){
 			float[] vertex;
 			Matrix4[] matrixUniform = new Matrix4[things.Count];
 			input = new Primitive[things.Count];
