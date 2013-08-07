@@ -53,13 +53,13 @@ namespace Railtype_PSM_Engine.Entities{
 			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
 			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
 			modelToWorld.RowW = new Vector4(x,y,z,modelToWorld.RowW.W);		
-			if(Globals.CPU_CALCULATION)
+			if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.CPU)
 				modelToWorld = modelToWorld.Transpose();
 			return modelToWorld;
 		}
 
 		public void PutModelVertexIntoArray(ref float[] input, int position){
-			if (Globals.CPU_CALCULATION){
+			if (Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.CPU){
 				Vector4 tmpv = new Vector4(0,0,0,1);
 				Vector4 result = new Vector4(0,0,0,1);
 				for(int i = 0; i < modelVertex.Length; i+=3 ){
@@ -72,7 +72,7 @@ namespace Railtype_PSM_Engine.Entities{
 					input[position+i+2] = result.Z;
 				}
 			}
-			else{
+			else if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_SOFT){
 				Array.Copy(modelVertex,0,input,position,modelVertex.Length); 
 			}
 		}
