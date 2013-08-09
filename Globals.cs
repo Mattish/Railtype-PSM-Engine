@@ -14,9 +14,9 @@ namespace Railtype_PSM_Engine{
 		};
 		
 		public static int AmountPerPush = 10;
-		public static COMPUTATION_TYPE COMPUTE_BY = COMPUTATION_TYPE.CPU;
+		public static COMPUTATION_TYPE COMPUTE_BY = COMPUTATION_TYPE.GPU_SOFT;
 		public static int frameCount;
-		public static ShaderProgram cpu, gpu;
+		public static ShaderProgram cpu, gpuSoft, gpuHard;
         public static Matrix4 cameraToWorld;
 		public static List<Thing> things;
 		public static int vertexSize;
@@ -40,7 +40,7 @@ namespace Railtype_PSM_Engine{
 					new Vector3(-1,-1,1),
 					new Vector3(-1,-1,-1)};
 
-			int[] verticies = new int[]{0,1,5,0,5,4,
+			int[] verticies = new int[]{0,1,5,0,5,4, 
 										0,1,3,0,3,2,
 										1,5,7,1,7,3,
 										2,3,7,2,7,6,
@@ -52,10 +52,8 @@ namespace Railtype_PSM_Engine{
 				cubevertex[(i*3)+1] = points[verticies[i]].Y;
 				cubevertex[(i*3)+2] = points[verticies[i]].Z;
 			}
-
-
-			for(int i = 0; i < 500;i++){
-				things.Add(new Thing(cubevertex,i));
+			for(int i = 0; i < 1;i++){
+				things.Add(new Thing((3*36*250),i));
 			}
 		}
 

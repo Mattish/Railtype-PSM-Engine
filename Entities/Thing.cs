@@ -6,17 +6,17 @@ using Railtype_PSM_Engine;
 
 namespace Railtype_PSM_Engine.Entities{
 	public class Thing{
-
-		float scalex,scaley,scalez,x,y,z,rotx,roty,rotz;
-		float[] modelVertex;
+		
+		public float[] modelVertex, scale, xyz, rot;
 		public int VertexCount;
 		public Matrix4 modelToWorld;
 		int number;
 
 		public Thing (){
 			modelToWorld = Matrix4.Identity;
-			scalex = scaley = scalez = 1.0f;
-			x = y = z = rotx = roty = rotz = 0.0f;
+			scale = new float[3]{1.0f,1.0f,1.0f};
+			xyz = new float[3]{0.0f,0.0f,0.0f};
+			rot = new float[3]{0.0f,0.0f,0.0f};
 		}
 
 		public Thing(float[] model) : this(){
@@ -43,16 +43,16 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public void update(){
-			z = -5.0f;
+			xyz[2] = -5.0f;
 			getModelToWorld();
-			rotx = roty += 0.005f;
+			rot[0] = rot[1] += 0.005f;
 		}
 		
 		public Matrix4 getModelToWorld(){
-			modelToWorld = Matrix4.Identity;			
-			modelToWorld *= Matrix4.RotationXyz(rotx,roty,rotz);
-			modelToWorld *= Matrix4.Scale(scalex,scaley,scalez);
-			modelToWorld.RowW = new Vector4(x,y,z,modelToWorld.RowW.W);		
+			modelToWorld = Matrix4.Identity;		
+			modelToWorld *= Matrix4.RotationXyz(rot[0],rot[1],rot[2]);
+			modelToWorld *= Matrix4.Scale(scale[0],scale[1],scale[2]);
+			modelToWorld.RowW = new Vector4(xyz[0],xyz[1],xyz[2],modelToWorld.RowW.W);		
 			if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.CPU)
 				modelToWorld = modelToWorld.Transpose();
 			return modelToWorld;
@@ -72,7 +72,8 @@ namespace Railtype_PSM_Engine.Entities{
 					input[position+i+2] = result.Z;
 				}
 			}
-			else if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_SOFT){
+			else if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_SOFT ||
+			        Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_HARD){
 				Array.Copy(modelVertex,0,input,position,modelVertex.Length); 
 			}
 		}
