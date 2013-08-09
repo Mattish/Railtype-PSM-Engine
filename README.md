@@ -23,7 +23,7 @@ These are 2 GPU methods I chose:
 GPU_SOFT: Same as before with pushing the matrix in batches to uniform in 10s. float attribute per vertex for matrix array number;
 GPU_HARD: Attributes for rotation, scale, translation and position each have 3 floats per vertex.
 
-# Disclaimer: The methods I use to pack up all the data for this may not be the best, who knows until someone else checks #
+### Disclaimer: The methods I use to pack up all the data for this may not be the best, who knows until someone else checks ###
 
 ~~~
 100 Cubes
