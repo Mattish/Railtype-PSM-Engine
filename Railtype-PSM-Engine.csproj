@@ -41,10 +41,9 @@
     <Compile Include="AppMain.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Entities\Thing.cs" />
+    <Compile Include="Entities\ThingManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ShaderProgram Include="shaders\cpu.vcg" />
-    <ShaderProgram Include="shaders\cpu.fcg" />
     <ShaderProgram Include="shaders\gpuSoft.fcg" />
     <ShaderProgram Include="shaders\gpuSoft.vcg" />
     <ShaderProgram Include="shaders\gpuHard.fcg" />

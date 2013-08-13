@@ -28,18 +28,17 @@ namespace Railtype_PSM_Engine.Entities{
 			number = input;
 			modelVertex = model;
 			VertexCount = model.Length/3;
-			modelToWorld = Matrix4.Identity;
 		}
 
 		public Thing(int amountOfVertex, int input) : this(){
 			modelVertex = new float[amountOfVertex*3];
-			VertexCount = amountOfVertex;
 			number = input;
 			for(int i = 0; i < modelVertex.Length; i+=3){
 				modelVertex[i] = (float)Globals.random.NextDouble();
 				modelVertex[i+1] = (float)Globals.random.NextDouble();
 				modelVertex[i+2] = (float)Globals.random.NextDouble();
 			}
+			VertexCount = modelVertex.Length/3;
 		}
 
 		public void update(){
@@ -48,34 +47,25 @@ namespace Railtype_PSM_Engine.Entities{
 			rot[0] = rot[1] += 0.005f;
 		}
 		
+		Vector4 tmp;
+		Matrix4 tmpMatrix;
 		public Matrix4 getModelToWorld(){
-			modelToWorld = Matrix4.Identity;		
-			modelToWorld *= Matrix4.RotationXyz(rot[0],rot[1],rot[2]);
-			modelToWorld *= Matrix4.Scale(scale[0],scale[1],scale[2]);
-			modelToWorld.RowW = new Vector4(xyz[0],xyz[1],xyz[2],modelToWorld.RowW.W);		
-			if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.CPU)
-				modelToWorld = modelToWorld.Transpose();
+			Matrix4.RotationXyz(rot[0],rot[1],rot[2], out modelToWorld);	
+			//modelToWorld *= Matrix4.Translation(xyz[0],xyz[1],xyz[2]);			
+			//modelToWorld *= Matrix4.RotationXyz(rot[0],rot[1],rot[2]);
+			Matrix4.Scale(scale[0],scale[1],scale[2], out tmpMatrix);
+			modelToWorld *= tmpMatrix;
+			//modelToWorld.RowW = new Vector4(xyz[0],xyz[1],xyz[2],1);
+			tmp.X = xyz[0];
+			tmp.Y = xyz[1];
+			tmp.Z = xyz[2];
+			tmp.W = 1;
+			modelToWorld.RowW = tmp;
 			return modelToWorld;
 		}
 
 		public void PutModelVertexIntoArray(ref float[] input, int position){
-			if (Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.CPU){
-				Vector4 tmpv = new Vector4(0,0,0,1);
-				Vector4 result = new Vector4(0,0,0,1);
-				for(int i = 0; i < modelVertex.Length; i+=3 ){
-					tmpv.X = modelVertex[i];
-					tmpv.Y = modelVertex[i+1];
-					tmpv.Z = modelVertex[i+2];
-					result = getModelToWorld().Transform(tmpv);
-					input[position+i] = result.X;
-					input[position+i+1] = result.Y;
-					input[position+i+2] = result.Z;
-				}
-			}
-			else if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_SOFT ||
-			        Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_HARD){
-				Array.Copy(modelVertex,0,input,position,modelVertex.Length); 
-			}
+			Array.Copy(modelVertex,0,input,position,modelVertex.Length); 
 		}
 
 	}

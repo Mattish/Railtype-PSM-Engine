@@ -37,17 +37,16 @@ GPU_HARD(red): 27fps
 CPU: Takes too long.
 
 1 model with same verticies count as 250 cubes (3*36*250)
-GPU_SOFT(green): 60fps
-GPU_HARD(red): 52fps
+GPU_SOFT(green): 31fps
+GPU_HARD(red): 12fps
 CPU: Takes too long.
 
-(36*250) models with 3 vertex
-GPU_SOFT(green): 18fps
-GPU_HARD(red): 2fps
+2500 models with 3 vertex
+GPU_SOFT(green): 6fps
+GPU_HARD(red): 6fps
 CPU: Takes too long.
 
 ~~~
-
 
 Older results between GPU_SOFT & CPU
 

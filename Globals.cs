@@ -8,15 +8,13 @@ using Railtype_PSM_Engine.Entities;
 namespace Railtype_PSM_Engine{
 	public static class Globals{
 		public enum COMPUTATION_TYPE{
-			CPU = 0,
-			GPU_SOFT = 1,
-			GPU_HARD = 2
+			GPU_SOFT = 0
 		};
 		
 		public static int AmountPerPush = 10;
 		public static COMPUTATION_TYPE COMPUTE_BY = COMPUTATION_TYPE.GPU_SOFT;
 		public static int frameCount;
-		public static ShaderProgram cpu, gpuSoft, gpuHard;
+		public static ShaderProgram gpuSoft;
         public static Matrix4 cameraToWorld;
 		public static List<Thing> things;
 		public static int vertexSize;
@@ -24,6 +22,7 @@ namespace Railtype_PSM_Engine{
 		static private GraphicsContext _graphic;
 		public static Matrix4 ViewProjection;
 		public static Random random;
+		public static float[] cubevertex;
 		static public void Setup(GraphicsContext graphic){
 			frameCount = 0;
 			_graphic = graphic;
@@ -46,14 +45,14 @@ namespace Railtype_PSM_Engine{
 										2,3,7,2,7,6,
 										0,4,6,0,6,2,
 										4,5,7,4,7,6};
-			float[] cubevertex = new float[108];
+			cubevertex = new float[108];
 			for(int i = 0; i < verticies.Length;i++){
 				cubevertex[(i*3)] = points[verticies[i]].X;
 				cubevertex[(i*3)+1] = points[verticies[i]].Y;
 				cubevertex[(i*3)+2] = points[verticies[i]].Z;
 			}
 			for(int i = 0; i < 1;i++){
-				things.Add(new Thing((3*36*250),i));
+				things.Add(new Thing(cubevertex,i));
 			}
 		}
 
