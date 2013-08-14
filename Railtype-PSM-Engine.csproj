@@ -46,8 +46,6 @@
   <ItemGroup>
     <ShaderProgram Include="shaders\gpuSoft.fcg" />
     <ShaderProgram Include="shaders\gpuSoft.vcg" />
-    <ShaderProgram Include="shaders\gpuHard.fcg" />
-    <ShaderProgram Include="shaders\gpuHard.vcg" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Sce\Sce.Psm.CSharp.targets" />
   <ItemGroup>
