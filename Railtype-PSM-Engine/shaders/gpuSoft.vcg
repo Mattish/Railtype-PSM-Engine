@@ -1,0 +1,12 @@
+
+void main( float4 in a_Position  : POSITION,
+		   float4 out v_Position : POSITION,
+		   float in matrixNumber : BLENDWEIGHT,	   		   
+		   uniform float4x4 WorldViewProj,
+		   uniform float4x4 modelToWorld[10]
+		   )
+{
+	int tmpInt = int(matrixNumber);
+	float4x4 tmp = mul( WorldViewProj, modelToWorld[tmpInt] );
+	v_Position = mul( tmp, a_Position );
+}
