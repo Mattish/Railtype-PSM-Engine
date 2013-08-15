@@ -68,7 +68,7 @@ foreach update on Things is currently updating no matter what. Not everything mo
 Draw():
 DrawArrays is being called once per 10 things. This is due to the matrix pushing via uniform explained above. 
 
-~~~~~~~~~~~~~~~~~~
+-------------------
 
 Options I have here come down to here are pretty much instead of passing matrix I pass a float[] of what the matrix would be calculating and process it per vertex which could turn out better due to poor CPU calculation time in the VM.
 
