@@ -24,7 +24,7 @@ These are 2 GPU methods I chose:
 GPU_SOFT: Same as before with pushing the matrix in batches to uniform in 10s. float attribute per vertex for matrix array number;
 GPU_HARD: Attributes for rotation, scale, translation and position each have 3 floats per vertex.~~
 
-Current state of the application @ 100 and 800 Things
+Current state of the application @ Things being 3 vertex/triangle.
 
 ```
 GPU_SOFT - Amount of Things:100 - fps:61 Memory usage: 2120KB
@@ -40,3 +40,35 @@ foreach update:12ms
 CheckVertexBuffer():0ms
 Draw():14ms
 ```
+
+Current state of the application @ Things being a random model of 333 vertex.
+
+```
+CheckNewThings():0ms
+foreach update:1ms
+CheckVertexBuffer():0ms
+Draw():1ms
+GPU_SOFT - Amount of Things:100 - fps:61 Memory usage: 2139KB
+
+CheckNewThings():0ms
+foreach update:3ms
+CheckVertexBuffer():0ms
+Draw():3ms
+GPU_SOFT - Amount of Things:190 - fps:61 Memory usage: 3426KB
+```
+
+Going higher then this crashes the program due to hitting the VBO count limit of 65000~ vertex
+
+
+###Breakdown/How can be improved:###
+
+foreach:
+foreach update on Things is currently updating no matter what. Not everything moves always in world coords, so if something doesnt move, it doesnt need to be updated.
+
+Draw():
+DrawArrays is being called once per 10 things. This is due to the matrix pushing via uniform explained above. 
+
+~~~~~~~~~~~~~~~~~~
+
+Options I have here come down to here are pretty much instead of passing matrix I pass a float[] of what the matrix would be calculating and process it per vertex which could turn out better due to poor CPU calculation time in the VM.
+

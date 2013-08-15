@@ -50,8 +50,8 @@ namespace Railtype_PSM_Engine{
 			
 			GamePadData gpd = GamePad.GetData(0);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Cross)){
-				for(int i = 0; i < 100; i++){
-					tm.AddThing(new Thing(3,Globals.frameCount));
+				for(int i = 0; i < 10; i++){
+					tm.AddThing(new Thing(333,Globals.frameCount));
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
