@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railtype-PSM-Engine", "Railtype-PSM-Engine.csproj", "{1D142BA8-003E-49D1-80A7-253B1F04B068}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railtype-PSM-Engine", "Railtype-PSM-Engine\Railtype-PSM-Engine.csproj", "{1D142BA8-003E-49D1-80A7-253B1F04B068}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{1DCA266E-D52B-44E3-A3FC-5F6ACDE88FAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{1D142BA8-003E-49D1-80A7-253B1F04B068}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D142BA8-003E-49D1-80A7-253B1F04B068}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D142BA8-003E-49D1-80A7-253B1F04B068}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DCA266E-D52B-44E3-A3FC-5F6ACDE88FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DCA266E-D52B-44E3-A3FC-5F6ACDE88FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DCA266E-D52B-44E3-A3FC-5F6ACDE88FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DCA266E-D52B-44E3-A3FC-5F6ACDE88FAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Railtype-PSM-Engine.csproj

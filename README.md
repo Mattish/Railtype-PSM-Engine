@@ -17,62 +17,26 @@ So cant push more then maybe 10 matrix per draw call even with a simple shader.
 
 These are run on the device(vita) in release mode.
 
-Ok, so calculating on the CPU is pretty much not worth it unless you are doing very little in terms of vertex count. The previous results are lower down.
+I've done proper optimizations on packing data into the VBO and the likes. Framerate is now far greater then it was. Currently with just positional data I can push the VBO to it's maximum capacity with system inplace for replacing disposed Things. This is looking to be improved even more.
 
+~~Ok, so calculating on the CPU is pretty much not worth it unless you are doing very little in terms of vertex count. The previous results are lower down.
 These are 2 GPU methods I chose:
 GPU_SOFT: Same as before with pushing the matrix in batches to uniform in 10s. float attribute per vertex for matrix array number;
-GPU_HARD: Attributes for rotation, scale, translation and position each have 3 floats per vertex.
+GPU_HARD: Attributes for rotation, scale, translation and position each have 3 floats per vertex.~~
 
-### Disclaimer: The methods I use to pack up all the data for this may not be the best, who knows until someone else checks ###
+Current state of the application @ 100 and 800 Things
 
-~~~
-100 Cubes
-GPU_SOFT(green): 60fps
-GPU_HARD(red): 60fps
-CPU(blue): 12fps
-
-250 Cubes
-GPU_SOFT(green): 37fps
-GPU_HARD(red): 27fps
-CPU: Takes too long.
-
-1 model with same verticies count as 250 cubes (3*36*250)
-GPU_SOFT(green): 31fps
-GPU_HARD(red): 12fps
-CPU: Takes too long.
-
-2500 models with 3 vertex
-GPU_SOFT(green): 6fps
-GPU_HARD(red): 6fps
-CPU: Takes too long.
-
-~~~
-
-Older results between GPU_SOFT & CPU
-
-~~~
-A quad here being 18 vertex.
-
-CPU-based(single call with CPU model positioning)
-53 FPS 500 quads 
-43 FPS 500 2quads(36 vertex)
-
-GPU-based(batch sending matrix as uniform in 10s)
-46 FPS on 500 quads 
-27 FPS on 500 2quads
+```
+GPU_SOFT - Amount of Things:100 - fps:61 Memory usage: 2120KB
+CheckNewThings():0ms
+foreach update:1ms
+CheckVertexBuffer():0ms
+Draw():1ms
 
 
-With random models
-
-CPU-based:
-19fps 500 random model of 50 vertex each
-22fps 250 random model of 100 vertex each
-12fps 100 random model of 500 vertex each
-24fps 100 random model of 250 vertex each
-
-GPU-based:
-20fps 500 random model of 50 vertex each
-24fps 250 random model of 100 vertex each
-15fps 100 random model of 500 vertex each
-29fps 100 random model of 250 vertex each
-~~~
+GPU_SOFT - Amount of Things:800 - fps:35 Memory usage: 2485KB
+CheckNewThings():0ms
+foreach update:12ms
+CheckVertexBuffer():0ms
+Draw():14ms
+```
