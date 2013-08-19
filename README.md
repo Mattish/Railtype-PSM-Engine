@@ -9,7 +9,7 @@ Can whack out a bunch of stuff while keeping 60fps. Hardware/VM limitations seem
 
 -------------------
 
-The SDK on vita currently has **massive** timesink for gfx calls as well as **very**, so attempting to limit them as much as possible.
+The SDK on vita currently has **massive** timesink for gfx calls as well as **very** slow CPU processing compared to other PSM devices, so attempting to limit them as much as possible and shove stuff onto the GPU.
 
 as per https://psm.playstation.net/static/general/dev/en/sdk_docs/overview_graphics_en.html ; "MaxVertexUniformVectors 128"
 So cant push more then maybe 15 matrix per draw call even with a simple shader.
