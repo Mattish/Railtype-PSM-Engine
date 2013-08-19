@@ -7,10 +7,11 @@ using Railtype_PSM_Engine;
 namespace Railtype_PSM_Engine.Entities{
 	public class Thing{
 		
-		public float[] modelVertex, scalexyzrot;
+		public float[] modelVertex, uv, scalexyzrot;
 		public int number;
 		public Matrix4 modelToWorld;
 		public Primitive prim;
+		float rand1,rand2;
 		public bool updated;
 		
 
@@ -18,17 +19,14 @@ namespace Railtype_PSM_Engine.Entities{
 			updated = false;
 			modelToWorld = Matrix4.Identity;
 			scalexyzrot = new float[7]{1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+			rand1 = (float)(Globals.random.NextDouble()*2)-1.0f;
+			rand2 = (float)(Globals.random.NextDouble()*2)-1.0f;
 		}
 
-		public Thing(float[] model) : this(){
-			modelVertex = model;
-			prim.Count = (ushort)(model.Length / 3);
-			prim.Mode = DrawMode.Triangles;
-		}
-
-		public Thing(float[] model, int number) : this(){
+		public Thing(float[] model, float[] _uv, int number) : this(){
 			this.number = number;
 			modelVertex = model;
+			uv = _uv;
 			prim.Count = (ushort)(model.Length / 3);
 			prim.Mode = DrawMode.Triangles;
 		}
@@ -46,14 +44,14 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public void update(){
-			updated = false;
-			
 			scalexyzrot[3] = -5.0f;
-			scalexyzrot[4] = scalexyzrot[5] += 0.005f;
-			updated = true;
+			scalexyzrot[1] += rand1*0.05f;
+			scalexyzrot[2] += rand2*0.05f;
+			
+			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;
 			
 			//if (updated)
-				UpdateModelToWorld();
+			UpdateModelToWorld();
 		}
 		
 		Vector4 tmp;
@@ -61,21 +59,23 @@ namespace Railtype_PSM_Engine.Entities{
 
 		private Matrix4 UpdateModelToWorld(){
 			Matrix4.RotationXyz(scalexyzrot[4], scalexyzrot[5], scalexyzrot[6], out modelToWorld);	
-			//modelToWorld *= Matrix4.Translation(xyz[0],xyz[1],xyz[2]);			
-			//modelToWorld *= Matrix4.RotationXyz(rot[0],rot[1],rot[2]);
 			Matrix4.Scale(scalexyzrot[0], scalexyzrot[0], scalexyzrot[0], out tmpMatrix);
 			modelToWorld *= tmpMatrix;
-			//modelToWorld.RowW = new Vector4(xyz[0],xyz[1],xyz[2],1);
 			tmp.X = scalexyzrot[1];
 			tmp.Y = scalexyzrot[2];
 			tmp.Z = scalexyzrot[3];
 			tmp.W = 1;
 			modelToWorld.RowW = tmp;
+			modelToWorld = modelToWorld.Transpose();
 			return modelToWorld;
 		}
 
 		public void PutModelVertexIntoArray(ref float[] input, int position){
 			Array.Copy(modelVertex, 0, input, position, modelVertex.Length); 
+		}
+		
+		public void PutModelUVIntoArray(ref float[] input, int position){
+			Array.Copy(uv,0,input,position,uv.Length);	
 		}
 
 	}

@@ -1,7 +1,12 @@
+uniform sampler2D Texture0 : TEXUNIT0;
 
 void main( float4 out Color : COLOR,
-			float in inputColor : TEXCOORD2
+			float2 in _uv : TEXCOORD2
 		   )
 {
-	Color = float4(0.0f,1.0f,0.0f,1.0f);
+	float4 tmpColor = tex2D(Texture0, _uv);
+	if (tmpColor[0] > 0.9f && tmpColor[1] > 0.9f && tmpColor[2] > 0.9f)
+		Color = float4(1.0f,0.0f,0.0f,1.0f);
+	else
+		Color = tmpColor;
 }

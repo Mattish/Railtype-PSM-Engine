@@ -12,6 +12,7 @@ namespace Railtype_PSM_Engine{
 	public class AppMain{
 		private GraphicsContext graphics;
 		public int counter, fpsCounter;
+		public Texture2D texture;
 		Stopwatch sw;
 		
 		ThingManager tm;
@@ -30,43 +31,41 @@ namespace Railtype_PSM_Engine{
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
 			tm = new ThingManager(graphics);
-			//Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuSoft.cgx");			
-			Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
+			Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuSoft.cgx");			
+			//Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
+			texture = new Texture2D("/Application/test.png",false,PixelFormat.Rgba);
 			
 			
 			//GPUSoft
-			int k = Globals.gpuSoft.FindAttribute("a_Position");
-			Globals.gpuSoft.SetAttributeBinding(k, "a_Position");			
-			k = Globals.gpuSoft.FindAttribute("matrixNumber");
-			Globals.gpuSoft.SetAttributeBinding(k, "matrixNumber");
-			k = Globals.gpuSoft.FindUniform("WorldViewProj");
+			Globals.gpuSoft.SetAttributeBinding(0, "a_Position");			
+			Globals.gpuSoft.SetAttributeBinding(1, "uv");
+			Globals.gpuSoft.SetAttributeBinding(2, "matrixNumber");
+			int k = Globals.gpuSoft.FindUniform("WorldViewProj");
 			Globals.gpuSoft.SetUniformBinding(k, "WorldViewProj");			
-			//k = Globals.gpuSoft.FindUniform("modelToWorld");
-			//Globals.gpuSoft.SetUniformBinding(k, "modelToWorld");
-			k = Globals.gpuSoft.FindUniform("scalexyzrot");
-			Globals.gpuSoft.SetUniformBinding(k, "scalexyzrot");
+			k = Globals.gpuSoft.FindUniform("modelToWorld");
+			Globals.gpuSoft.SetUniformBinding(k, "modelToWorld");
+			//k = Globals.gpuSoft.FindUniform("scalexyzrot");
+			//Globals.gpuSoft.SetUniformBinding(k, "scalexyzrot");
 			
 			sw = new Stopwatch();
 			sw.Start();
+			graphics.Enable (EnableMode.Blend);
+			graphics.Enable (EnableMode.CullFace);
+			graphics.SetBlendFunc(new BlendFunc(BlendFuncMode.Add,BlendFuncFactor.SrcAlpha,BlendFuncFactor.OneMinusSrcAlpha));
+			graphics.SetTexture(0,texture);
 		}
  
 		public void Update(){
 			
 			GamePadData gpd = GamePad.GetData(0);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Cross)){
-				for(int i = 0; i < 10; i++){
-					Globals.thingManager.AddThing(new Thing(333,Globals.frameCount));
+				for(int i = 0; i < 1; i++){
+					Globals.thingManager.AddThing(new Thing(Globals.cubevertex,Globals.cubeuv,Globals.frameCount+i));
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
-				for(int i = 0; i < 1; i++){
-					Globals.thingManager.RemoveThing(tm.GetFirstThing());
-				}
-				
-			}
-			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Square)){
-				for(int i = 0; i < 5; i++){
-					Globals.thingManager.AddThing(new Thing(7,Globals.frameCount));
+				for(int i = 0; i < 10; i++){
+					Globals.thingManager.AddThing(new Thing(Globals.cubevertex,Globals.cubeuv,Globals.frameCount+i));
 				}
 				
 			}

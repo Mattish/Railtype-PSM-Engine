@@ -25,10 +25,13 @@ float4x4 getRotZMatrix(float angle){
 void main( float4 in a_Position  : POSITION,
 		   float4 out v_Position : POSITION,
 		   float in matrixNumber : BLENDWEIGHT,
+		   float2 in uv : TEXCOORD0,
+		   float2 out _uv : TEXCOORD2,
 		   uniform float4x4 WorldViewProj,
 		   uniform float scalexyzrot[70]
 		   )
 {
+	_uv = uv;
 	float4x4 tmpMatrix, tmpMatrix2;
 	/*float4x4 modelToWorld = {{1,0,0,0}, // modelToWorld = Matrix4.Identity;
 							 {0,1,0,0}, 

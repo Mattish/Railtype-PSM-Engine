@@ -1,12 +1,16 @@
 
 void main( float4 in a_Position  : POSITION,
 		   float4 out v_Position : POSITION,
-		   float in matrixNumber : BLENDWEIGHT,	   		   
+		   float in matrixNumber : BLENDWEIGHT,	 
+		   float2 in uv : TEXCOORD0,
+		   float2 out _uv : TEXCOORD2,  		   
 		   uniform float4x4 WorldViewProj,
 		   uniform float4x4 modelToWorld[10]
 		   )
 {
+	_uv = uv;
 	int tmpInt = int(matrixNumber);
-	float4x4 tmp = mul( WorldViewProj, modelToWorld[tmpInt] );
+	float4x4 tmpMat = transpose(modelToWorld[tmpInt]);
+	float4x4 tmp = mul( WorldViewProj, tmpMat );
 	v_Position = mul( tmp, a_Position );
 }
