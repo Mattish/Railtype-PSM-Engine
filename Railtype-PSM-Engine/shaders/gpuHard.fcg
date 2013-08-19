@@ -1,0 +1,6 @@
+
+void main( float4 out Color : COLOR
+		   )
+{
+	Color = float4(0.0f,1.0f,0.0f,1.0f);
+}

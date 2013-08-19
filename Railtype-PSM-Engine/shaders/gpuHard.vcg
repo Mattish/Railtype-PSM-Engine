@@ -1,0 +1,62 @@
+float4x4 getRotXMatrix(float angle){
+	float4x4 result = {{1.0f,0.0f,0.0f,0.0f},
+			   	   	{0.0f,cos(angle),-(sin(angle)),0.0f},
+					{0.0f,sin(angle),cos(angle),0.0f},
+					{0.0f,0.0f,0.0f,1.0f}};
+	return result;
+}
+
+float4x4 getRotYMatrix(float angle){
+	float4x4 result = {{cos(angle),0.0f,(sin(angle)),0.0f},
+			   	   	{0.0f,1.0f,0.0f,0.0f},
+					{-sin(angle),0.0f,cos(angle),0.0f},
+					{0.0f,0.0f,0.0f,1.0f}};
+	return result;
+}
+
+float4x4 getRotZMatrix(float angle){
+	float4x4 result = {{cos(angle),-(sin(angle)),0.0f,0.0f},
+			   	   	{sin(angle),cos(angle),0.0f,0.0f},
+					{0.0f,0.0f,1.0f,0.0f},
+					{0.0f,0.0f,0.0f,1.0f}};
+	return result;
+}
+
+void main( float4 in a_Position  : POSITION,
+		   float4 out v_Position : POSITION,
+		   float in matrixNumber : BLENDWEIGHT,
+		   uniform float4x4 WorldViewProj,
+		   uniform float scalexyzrot[70]
+		   )
+{
+	float4x4 tmpMatrix, tmpMatrix2;
+	/*float4x4 modelToWorld = {{1,0,0,0}, // modelToWorld = Matrix4.Identity;
+							 {0,1,0,0}, 
+							 {0,0,1,0}, 
+							 {0,0,0,1}};*/
+
+	//tmpMatrix = getRotXMatrix(scalexyzrot[4+(matrixNumber*7)]);
+	float4x4 modelToWorld = getRotXMatrix(scalexyzrot[4+(matrixNumber*7)]);
+
+	tmpMatrix = getRotYMatrix(scalexyzrot[5+(matrixNumber*7)]);
+	modelToWorld = mul(modelToWorld,tmpMatrix);
+
+	tmpMatrix = getRotZMatrix(scalexyzrot[6+(matrixNumber*7)]);
+	modelToWorld = mul(modelToWorld,tmpMatrix);
+
+	tmpMatrix[0] = float4(scalexyzrot[(matrixNumber*7)],0,0,0);
+	tmpMatrix[1] = float4(0,scalexyzrot[(matrixNumber*7)],0,0);
+	tmpMatrix[2] = float4(0,0,scalexyzrot[(matrixNumber*7)],0);
+	tmpMatrix[3] = float4(0,0,0,1);
+	modelToWorld = mul(modelToWorld,tmpMatrix);
+
+	tmpMatrix[0] = float4(1,0,0,0);
+	tmpMatrix[1] = float4(0,1,0,0);
+	tmpMatrix[2] = float4(0,0,1,0);
+	tmpMatrix[3] = float4(scalexyzrot[1+(matrixNumber*7)],scalexyzrot[2+(matrixNumber*7)],scalexyzrot[3+(matrixNumber*7)],1);
+ 	modelToWorld = mul(modelToWorld,tmpMatrix);
+ 	modelToWorld = transpose(modelToWorld);
+ 	
+	float4x4 tmp = mul( WorldViewProj, modelToWorld );
+	v_Position = mul( tmp, a_Position );
+}

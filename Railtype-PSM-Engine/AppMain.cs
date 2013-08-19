@@ -30,7 +30,9 @@ namespace Railtype_PSM_Engine{
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
 			tm = new ThingManager(graphics);
-			Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuSoft.cgx");			
+			//Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuSoft.cgx");			
+			Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
+			
 			
 			//GPUSoft
 			int k = Globals.gpuSoft.FindAttribute("a_Position");
@@ -39,8 +41,10 @@ namespace Railtype_PSM_Engine{
 			Globals.gpuSoft.SetAttributeBinding(k, "matrixNumber");
 			k = Globals.gpuSoft.FindUniform("WorldViewProj");
 			Globals.gpuSoft.SetUniformBinding(k, "WorldViewProj");			
-			k = Globals.gpuSoft.FindUniform("modelToWorld");
-			Globals.gpuSoft.SetUniformBinding(k, "modelToWorld");
+			//k = Globals.gpuSoft.FindUniform("modelToWorld");
+			//Globals.gpuSoft.SetUniformBinding(k, "modelToWorld");
+			k = Globals.gpuSoft.FindUniform("scalexyzrot");
+			Globals.gpuSoft.SetUniformBinding(k, "scalexyzrot");
 			
 			sw = new Stopwatch();
 			sw.Start();
@@ -51,23 +55,23 @@ namespace Railtype_PSM_Engine{
 			GamePadData gpd = GamePad.GetData(0);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Cross)){
 				for(int i = 0; i < 10; i++){
-					tm.AddThing(new Thing(333,Globals.frameCount));
+					Globals.thingManager.AddThing(new Thing(333,Globals.frameCount));
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
 				for(int i = 0; i < 1; i++){
-					tm.RemoveThing(tm.GetFirstThing());
+					Globals.thingManager.RemoveThing(tm.GetFirstThing());
 				}
 				
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Square)){
 				for(int i = 0; i < 5; i++){
-					tm.AddThing(new Thing(7,Globals.frameCount));
+					Globals.thingManager.AddThing(new Thing(7,Globals.frameCount));
 				}
 				
 			}
 			
-			tm.Update();
+			Globals.thingManager.Update();
 			
 		}
 
@@ -77,8 +81,7 @@ namespace Railtype_PSM_Engine{
 							
 			counter++;
 			
-			tm.Draw();
-			//DoDrawing(ref graphics);
+			Globals.thingManager.Draw();
 			graphics.SwapBuffers();
 
 		}

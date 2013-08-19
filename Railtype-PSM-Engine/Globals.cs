@@ -16,7 +16,7 @@ namespace Railtype_PSM_Engine{
 		public static int frameCount;
 		public static ShaderProgram gpuSoft;
         public static Matrix4 cameraToWorld;
-		public static List<Thing> things;
+		public static ThingManager thingManager;
 		public static int vertexSize;
 		public static VertexBuffer modelVertexBuffer;
 		static private GraphicsContext _graphic;
@@ -26,8 +26,8 @@ namespace Railtype_PSM_Engine{
 		static public void Setup(GraphicsContext graphic){
 			frameCount = 0;
 			_graphic = graphic;
+			thingManager = new ThingManager(graphic);
 			random = new Random();
-			things = new List<Thing>(100);
  			cameraToWorld = Matrix4.Identity;
 
 			Vector3[] points = new Vector3[]{new Vector3(1,1,1),
@@ -50,9 +50,6 @@ namespace Railtype_PSM_Engine{
 				cubevertex[(i*3)] = points[verticies[i]].X;
 				cubevertex[(i*3)+1] = points[verticies[i]].Y;
 				cubevertex[(i*3)+2] = points[verticies[i]].Z;
-			}
-			for(int i = 0; i < 1;i++){
-				things.Add(new Thing(cubevertex,i));
 			}
 		}
 

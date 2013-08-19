@@ -7,7 +7,7 @@ using Railtype_PSM_Engine;
 namespace Railtype_PSM_Engine.Entities{
 	public class Thing{
 		
-		public float[] modelVertex, scale, xyz, rot;
+		public float[] modelVertex, scalexyzrot;
 		public int number;
 		public Matrix4 modelToWorld;
 		public Primitive prim;
@@ -17,9 +17,7 @@ namespace Railtype_PSM_Engine.Entities{
 		Thing(){
 			updated = false;
 			modelToWorld = Matrix4.Identity;
-			scale = new float[3]{1.0f,1.0f,1.0f};
-			xyz = new float[3]{0.0f,0.0f,0.0f};
-			rot = new float[3]{0.0f,0.0f,0.0f};
+			scalexyzrot = new float[7]{1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
 		}
 
 		public Thing(float[] model) : this(){
@@ -50,8 +48,8 @@ namespace Railtype_PSM_Engine.Entities{
 		public void update(){
 			updated = false;
 			
-			xyz[2] = -5.0f;
-			rot[0] = rot[1] += 0.005f;
+			scalexyzrot[3] = -5.0f;
+			scalexyzrot[4] = scalexyzrot[5] += 0.005f;
 			updated = true;
 			
 			//if (updated)
@@ -62,15 +60,15 @@ namespace Railtype_PSM_Engine.Entities{
 		Matrix4 tmpMatrix;
 
 		private Matrix4 UpdateModelToWorld(){
-			Matrix4.RotationXyz(rot[0], rot[1], rot[2], out modelToWorld);	
+			Matrix4.RotationXyz(scalexyzrot[4], scalexyzrot[5], scalexyzrot[6], out modelToWorld);	
 			//modelToWorld *= Matrix4.Translation(xyz[0],xyz[1],xyz[2]);			
 			//modelToWorld *= Matrix4.RotationXyz(rot[0],rot[1],rot[2]);
-			Matrix4.Scale(scale[0], scale[1], scale[2], out tmpMatrix);
+			Matrix4.Scale(scalexyzrot[0], scalexyzrot[0], scalexyzrot[0], out tmpMatrix);
 			modelToWorld *= tmpMatrix;
 			//modelToWorld.RowW = new Vector4(xyz[0],xyz[1],xyz[2],1);
-			tmp.X = xyz[0];
-			tmp.Y = xyz[1];
-			tmp.Z = xyz[2];
+			tmp.X = scalexyzrot[1];
+			tmp.Y = scalexyzrot[2];
+			tmp.Z = scalexyzrot[3];
 			tmp.W = 1;
 			modelToWorld.RowW = tmp;
 			return modelToWorld;

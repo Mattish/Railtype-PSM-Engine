@@ -11,7 +11,7 @@ namespace Railtype_PSM_Engine{
 		GraphicsContext gc;
 		int fragmentedFloats, lastIndex, lastVerticiesIndex, fpsCounter;
 		List<Thing> disposed, things, toAdd;
-		Matrix4[] matricies;
+		float[] thingShaderInfo;
 		Matrix4 cameraToProjection;
 		Primitive[] prims;
 		Stopwatch sw;
@@ -26,7 +26,7 @@ namespace Railtype_PSM_Engine{
 			lastVerticiesIndex = 0;
 			vertex = new float[65000*3];
 			matrixNumber = new float[vertex.Length/3];
-			matricies = new Matrix4[1];
+			thingShaderInfo = new float[7];
 			disposed = new List<Thing>();
 			things = new List<Thing>();
 			toAdd = new List<Thing>();
@@ -130,7 +130,7 @@ namespace Railtype_PSM_Engine{
 				
 				if (prims.Length < things.Count){
 					prims = new Primitive[things.Count];
-					Array.Resize<Matrix4>(ref matricies,things.Count);
+					Array.Resize<float>(ref thingShaderInfo,things.Count*7);
 				}
 				
 				if (matrixNumber.Length < vertex.Length/3)
@@ -149,7 +149,7 @@ namespace Railtype_PSM_Engine{
 				//Prim Array
 				prims[i] = things[i].prim;		
 				//Matrix Array
-				matricies[i] = things[i].modelToWorld;
+				Array.Copy(things[i].scalexyzrot,0,thingShaderInfo,i*7,7);
 			}
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
@@ -189,8 +189,8 @@ namespace Railtype_PSM_Engine{
 				int primCounter = 0, HowManyToPush = 0;
 				while(primCounter < prims.Length){
 					HowManyToPush = prims.Length - primCounter > 10 ? 10 : prims.Length - primCounter;
-					k = Globals.gpuSoft.FindUniform("modelToWorld");
-					Globals.gpuSoft.SetUniformValue(k, matricies, 0, primCounter, HowManyToPush);			
+					k = Globals.gpuSoft.FindUniform("scalexyzrot");
+					Globals.gpuSoft.SetUniformValue(k, thingShaderInfo, 0, primCounter*7, HowManyToPush*7);			
 					gc.DrawArrays(prims, primCounter, HowManyToPush);
 					primCounter += HowManyToPush;
 				}
