@@ -14,7 +14,7 @@ namespace Railtype_PSM_Engine{
 		public static int AmountPerPush = 10;
 		public static COMPUTATION_TYPE COMPUTE_BY = COMPUTATION_TYPE.GPU_SOFT;
 		public static int frameCount;
-		public static ShaderProgram gpuSoft;
+		public static ShaderProgram gpuHard;
         public static Matrix4 cameraToWorld;
 		public static ThingManager thingManager;
 		public static int vertexSize;

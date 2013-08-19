@@ -32,13 +32,7 @@ void main( float4 in a_Position  : POSITION,
 		   )
 {
 	_uv = uv;
-	float4x4 tmpMatrix, tmpMatrix2;
-	/*float4x4 modelToWorld = {{1,0,0,0}, // modelToWorld = Matrix4.Identity;
-							 {0,1,0,0}, 
-							 {0,0,1,0}, 
-							 {0,0,0,1}};*/
-
-	//tmpMatrix = getRotXMatrix(scalexyzrot[4+(matrixNumber*7)]);
+	float4x4 tmpMatrix;
 	float4x4 modelToWorld = getRotXMatrix(scalexyzrot[4+(matrixNumber*7)]);
 
 	tmpMatrix = getRotYMatrix(scalexyzrot[5+(matrixNumber*7)]);

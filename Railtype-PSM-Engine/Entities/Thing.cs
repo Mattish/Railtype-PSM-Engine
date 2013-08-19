@@ -47,11 +47,7 @@ namespace Railtype_PSM_Engine.Entities{
 			scalexyzrot[3] = -5.0f;
 			scalexyzrot[1] += rand1*0.05f;
 			scalexyzrot[2] += rand2*0.05f;
-			
 			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;
-			
-			//if (updated)
-			UpdateModelToWorld();
 		}
 		
 		Vector4 tmp;

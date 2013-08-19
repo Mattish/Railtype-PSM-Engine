@@ -30,22 +30,19 @@ namespace Railtype_PSM_Engine{
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
-			tm = new ThingManager(graphics);
-			Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuSoft.cgx");			
-			//Globals.gpuSoft = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
-			texture = new Texture2D("/Application/test.png",false,PixelFormat.Rgba);
+			tm = new ThingManager(graphics);			
+			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
+			texture = new Texture2D("/Application/railgun.png",false,PixelFormat.Rgba);
 			
 			
 			//GPUSoft
-			Globals.gpuSoft.SetAttributeBinding(0, "a_Position");			
-			Globals.gpuSoft.SetAttributeBinding(1, "uv");
-			Globals.gpuSoft.SetAttributeBinding(2, "matrixNumber");
-			int k = Globals.gpuSoft.FindUniform("WorldViewProj");
-			Globals.gpuSoft.SetUniformBinding(k, "WorldViewProj");			
-			k = Globals.gpuSoft.FindUniform("modelToWorld");
-			Globals.gpuSoft.SetUniformBinding(k, "modelToWorld");
-			//k = Globals.gpuSoft.FindUniform("scalexyzrot");
-			//Globals.gpuSoft.SetUniformBinding(k, "scalexyzrot");
+			Globals.gpuHard.SetAttributeBinding(0, "a_Position");			
+			Globals.gpuHard.SetAttributeBinding(1, "uv");
+			Globals.gpuHard.SetAttributeBinding(2, "matrixNumber");
+			int k = Globals.gpuHard.FindUniform("WorldViewProj");
+			Globals.gpuHard.SetUniformBinding(k, "WorldViewProj");			
+			k = Globals.gpuHard.FindUniform("scalexyzrot");
+			Globals.gpuHard.SetUniformBinding(k, "scalexyzrot");
 			
 			sw = new Stopwatch();
 			sw.Start();
@@ -64,7 +61,7 @@ namespace Railtype_PSM_Engine{
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
-				for(int i = 0; i < 10; i++){
+				for(int i = 0; i < 100; i++){
 					Globals.thingManager.AddThing(new Thing(Globals.cubevertex,Globals.cubeuv,Globals.frameCount+i));
 				}
 				
