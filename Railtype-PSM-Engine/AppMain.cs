@@ -13,6 +13,7 @@ namespace Railtype_PSM_Engine{
 		private GraphicsContext graphics;
 		public int counter, fpsCounter;
 		public Texture2D texture;
+		Railtype_PSM_Engine.Util.WaveFrontObject wfo;
 		Stopwatch sw;
 		
 		ThingManager tm;
@@ -30,6 +31,7 @@ namespace Railtype_PSM_Engine{
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
+			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/ship9.obj");
 			tm = new ThingManager(graphics);			
 			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
 			texture = new Texture2D("/Application/railgun.png",false,PixelFormat.Rgba);
@@ -57,16 +59,33 @@ namespace Railtype_PSM_Engine{
 			GamePadData gpd = GamePad.GetData(0);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Cross)){
 				for(int i = 0; i < 1; i++){
-					Globals.thingManager.AddThing(new Thing(Globals.cubevertex,Globals.cubeuv,Globals.frameCount+i));
+					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
 				}
 			}
-			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
-				for(int i = 0; i < 100; i++){
-					Globals.thingManager.AddThing(new Thing(Globals.cubevertex,Globals.cubeuv,Globals.frameCount+i));
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Square)){
+				for(int i = 0; i < 10; i++){
+					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
 				}
-				
+			}
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle) && Globals.thingManager.ThingCount() == 0){
+				for(int i = 0; i < 180; i++){
+					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
+				}
+			}			
+			if (gpd.ButtonsDown.HasFlag(GamePadButtons.L)){
+				for(int i = 0; i < 10; i++){
+					Globals.thingManager.RemoveThing(Globals.thingManager.GetFirstThing());
+				}
+			}
+			if (gpd.ButtonsDown.HasFlag(GamePadButtons.R)){
+				int count = Globals.thingManager.ThingCount();
+				for(int i = 0; i < count; i++){
+					Globals.thingManager.RemoveThing(Globals.thingManager.GetFirstThing());
+				}
 			}
 			
+			if (gpd.ButtonsDown.HasFlag(GamePadButtons.Start))
+				Environment.Exit(0);
 			Globals.thingManager.Update();
 			
 		}

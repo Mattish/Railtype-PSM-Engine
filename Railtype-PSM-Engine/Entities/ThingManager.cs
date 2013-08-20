@@ -5,11 +5,12 @@ using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core;
 using System.Diagnostics;
 
-namespace Railtype_PSM_Engine{
+namespace Railtype_PSM_Engine.Entities{
 	public class ThingManager{
 		float[] vertex, matrixNumber, uv;
 		GraphicsContext gc;
 		int fragmentedFloats, lastIndex, lastVerticiesIndex, fpsCounter;
+		long[] longestTook;
 		List<Thing> disposed, things, toAdd;
 		float[] thingShaderInfo;
 		Matrix4 cameraToProjection;
@@ -20,12 +21,15 @@ namespace Railtype_PSM_Engine{
 			sw = new Stopwatch();
 			gc = gc_;
 			fragmentedFloats = 0;
+			longestTook = new long[10];
 			fpsCounter = 0;
-			cameraToProjection = Matrix4.Perspective(FMath.Radians(45.0f), gc.Screen.AspectRatio, 1.0f, 1000.0f);
+			cameraToProjection = Matrix4.Perspective(FMath.Radians(30.0f), gc.Screen.AspectRatio, 1.0f, 1000.0f);
+			//cameraToProjection = Matrix4.Identity;
+			//cameraToProjection *= Matrix4.Ortho(-1f,1f,-1f,1f,1f,1000.0f);
 			lastIndex = -1;
 			lastVerticiesIndex = 0;
-			vertex = new float[65000 * 3];
-			uv = new float[65000 * 2];
+			vertex = new float[(65000 * 3)];
+			uv = new float[(65000 * 2)];
 			matrixNumber = new float[65000];
 			thingShaderInfo = new float[7];
 			
@@ -67,10 +71,10 @@ namespace Railtype_PSM_Engine{
 		public void CheckNewThings(){
 			bufferLowIndex = int.MaxValue;
 			bufferHighIndex = primCountDiff = fitIns = newOnes = 0;
-			
 			if(toAdd.Count > 0){ // Need to push things into main list
 				while(toAdd.Count > 0){
 					bool foundDisposable = false;
+					
 					if(disposed.Count > 0){
 						for(int i = 0; i < disposed.Count; i++){
 							primCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
@@ -100,13 +104,14 @@ namespace Railtype_PSM_Engine{
 							}
 						}
 					}
+					
 					if(!foundDisposable){ // Cant find something to replace, add to the end of array
 						if(lastIndex < 0)
 							lastIndex = 0;
 						else
 							lastIndex = (lastIndex + toAdd[0].prim.Count);
 						toAdd[0].prim.First = (ushort)lastIndex;
-						if(vertex.Length < (lastVerticiesIndex + toAdd[0].prim.Count) * 3){
+						if(vertex.Length < (lastVerticiesIndex + toAdd[0].prim.Count * 3)){
 							Array.Resize<float>(ref vertex, (lastVerticiesIndex + toAdd[0].prim.Count * 3));	
 							Array.Resize<float>(ref uv, (lastVerticiesIndex + toAdd[0].prim.Count * 2));
 						}
@@ -119,7 +124,9 @@ namespace Railtype_PSM_Engine{
 					}
 					things.Add(toAdd[0]);
 					toAdd.RemoveAt(0);
+					
 				}
+				
 				Console.WriteLine("fitIns:" + fitIns + " - newOnes:" + newOnes);
 			}
 		}
@@ -165,26 +172,29 @@ namespace Railtype_PSM_Engine{
 		
 		public void Update(){
 			
-			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-			sw.Start();
+			System.Diagnostics.Stopwatch sww = new System.Diagnostics.Stopwatch();
+			sww.Start();
 			CheckNewThings();
-			sw.Stop();
-			if(Globals.frameCount % 60 == 0)
-				Console.WriteLine("CheckNewThings():" + sw.ElapsedMilliseconds + "ms");
-			sw.Reset();
-			sw.Start();
+			sww.Stop();
+			longestTook[0] = sww.ElapsedMilliseconds > longestTook[0] ? sww.ElapsedMilliseconds : longestTook[0];
+			if(sw.ElapsedMilliseconds > 1000)
+				Console.WriteLine("CheckNewThings():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[0] + "ms");
+			sww.Reset();
+			sww.Start();
 			foreach(Thing thing in things){
 				thing.update();	
 			}
-			sw.Stop();
-			if(Globals.frameCount % 60 == 0)
-				Console.WriteLine("foreach update:" + sw.ElapsedMilliseconds + "ms");
-			sw.Reset();
-			sw.Start();			
+			sww.Stop();
+			longestTook[1] = sww.ElapsedMilliseconds > longestTook[1] ? sww.ElapsedMilliseconds : longestTook[1];
+			if(sw.ElapsedMilliseconds > 1000)
+				Console.WriteLine("foreach update:" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[1] + "ms");
+			sww.Reset();
+			sww.Start();			
 			CheckVertexBuffer();		
-			sw.Stop();
-			if(Globals.frameCount % 60 == 0)
-				Console.WriteLine("CheckVertexBuffer():" + sw.ElapsedMilliseconds + "ms");
+			sww.Stop();
+			longestTook[2] = sww.ElapsedMilliseconds > longestTook[2] ? sww.ElapsedMilliseconds : longestTook[2];
+			if(sw.ElapsedMilliseconds > 1000)
+				Console.WriteLine("CheckVertexBuffer():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[2] + "ms");
 		}
 		
 		public void Draw(){
@@ -207,10 +217,9 @@ namespace Railtype_PSM_Engine{
 				}
 			}
 			sww.Stop();
-			if(Globals.frameCount % 60 == 0)
-				Console.WriteLine("Draw():" + sww.ElapsedMilliseconds + "ms");
-			
+			longestTook[3] = sww.ElapsedMilliseconds > longestTook[3] ? sww.ElapsedMilliseconds : longestTook[3];
 			if(sw.ElapsedMilliseconds > 1000){
+				Console.WriteLine("Draw():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[3] + "ms");
 				Console.WriteLine(Globals.COMPUTE_BY.ToString() + " - Amount of Things:" + ThingCount() + " - fps:" + fpsCounter + " Memory usage: " + (GC.GetTotalMemory(true) / 1024) + "KB");
 				fpsCounter = 0;
 				sw.Reset();
@@ -218,6 +227,7 @@ namespace Railtype_PSM_Engine{
 			}
 			fpsCounter++;
 			Globals.frameCount++;
+			longestTook = new long[10];
 		}
 		
 		//Tweaked version of this to allow for positional inserts

@@ -23,7 +23,7 @@ namespace Railtype_PSM_Engine.Entities{
 			rand2 = (float)(Globals.random.NextDouble()*2)-1.0f;
 		}
 
-		public Thing(float[] model, float[] _uv, int number) : this(){
+		public Thing(ref float[] model, ref float[] _uv, int number) : this(){
 			this.number = number;
 			modelVertex = model;
 			uv = _uv;
@@ -52,7 +52,6 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		Vector4 tmp;
 		Matrix4 tmpMatrix;
-
 		private Matrix4 UpdateModelToWorld(){
 			Matrix4.RotationXyz(scalexyzrot[4], scalexyzrot[5], scalexyzrot[6], out modelToWorld);	
 			Matrix4.Scale(scalexyzrot[0], scalexyzrot[0], scalexyzrot[0], out tmpMatrix);
