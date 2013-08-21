@@ -34,7 +34,7 @@ namespace Railtype_PSM_Engine{
 			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/ship9.obj");
 			tm = new ThingManager(graphics);			
 			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
-			texture = new Texture2D("/Application/railgun.png",false,PixelFormat.Rgba);
+			texture = new Texture2D("/Application/duck.png",false,PixelFormat.Rgba);
 			
 			
 			//GPUSoft
@@ -50,6 +50,7 @@ namespace Railtype_PSM_Engine{
 			sw.Start();
 			graphics.Enable (EnableMode.Blend);
 			graphics.Enable (EnableMode.CullFace);
+			graphics.Enable (EnableMode.DepthTest);
 			graphics.SetBlendFunc(new BlendFunc(BlendFuncMode.Add,BlendFuncFactor.SrcAlpha,BlendFuncFactor.OneMinusSrcAlpha));
 			graphics.SetTexture(0,texture);
 		}
@@ -59,17 +60,17 @@ namespace Railtype_PSM_Engine{
 			GamePadData gpd = GamePad.GetData(0);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Cross)){
 				for(int i = 0; i < 1; i++){
-					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
+					Globals.thingManager.AddThing(new Thing(wfo));
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Square)){
 				for(int i = 0; i < 10; i++){
-					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
+					//Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle) && Globals.thingManager.ThingCount() == 0){
 				for(int i = 0; i < 180; i++){
-					Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
+					Globals.thingManager.AddThing(new Thing(ref Globals.cubevertex,ref Globals.cubeuv,Globals.frameCount+i));
 				}
 			}			
 			if (gpd.ButtonsDown.HasFlag(GamePadButtons.L)){

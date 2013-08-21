@@ -8,6 +8,7 @@ using System.Diagnostics;
 namespace Railtype_PSM_Engine.Entities{
 	public class ThingManager{
 		float[] vertex, matrixNumber, uv;
+		ushort[] indicies;
 		GraphicsContext gc;
 		int fragmentedFloats, lastIndex, lastVerticiesIndex, fpsCounter;
 		long[] longestTook;
@@ -23,7 +24,7 @@ namespace Railtype_PSM_Engine.Entities{
 			fragmentedFloats = 0;
 			longestTook = new long[10];
 			fpsCounter = 0;
-			cameraToProjection = Matrix4.Perspective(FMath.Radians(30.0f), gc.Screen.AspectRatio, 1.0f, 1000.0f);
+			cameraToProjection = Matrix4.Perspective(FMath.Radians(30.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 			//cameraToProjection = Matrix4.Identity;
 			//cameraToProjection *= Matrix4.Ortho(-1f,1f,-1f,1f,1f,1000.0f);
 			lastIndex = -1;
@@ -31,6 +32,7 @@ namespace Railtype_PSM_Engine.Entities{
 			vertex = new float[(65000 * 3)];
 			uv = new float[(65000 * 2)];
 			matrixNumber = new float[65000];
+			indicies = new ushort[65000];
 			thingShaderInfo = new float[7];
 			
 			disposed = new List<Thing>();
@@ -66,36 +68,37 @@ namespace Railtype_PSM_Engine.Entities{
 			return false;
 		}
 		
-		int bufferLowIndex, bufferHighIndex, primCountDiff, fitIns, newOnes;
+		int bufferLowIndex, bufferHighIndex, vertexCountDiff, fitIns, newOnes;
 
 		public void CheckNewThings(){
 			bufferLowIndex = int.MaxValue;
-			bufferHighIndex = primCountDiff = fitIns = newOnes = 0;
+			bufferHighIndex = vertexCountDiff = fitIns = newOnes = 0;
 			if(toAdd.Count > 0){ // Need to push things into main list
 				while(toAdd.Count > 0){
 					bool foundDisposable = false;
 					
 					if(disposed.Count > 0){
 						for(int i = 0; i < disposed.Count; i++){
-							primCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
-							if(disposed[i].prim.First == lastIndex){ // if its the last prim in vertex array
-								primCountDiff = 0;
-								lastVerticiesIndex = (lastIndex + toAdd[0].prim.Count) * 3;
+							//primCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
+							vertexCountDiff = disposed[i].vertexCount - toAdd[0].vertexCount;
+							if(disposed[i].vertexIndex == lastIndex){ // if its the last prim in vertex array
+								vertexCountDiff = 0;
+								lastVerticiesIndex = (lastIndex + toAdd[0].vertexCount) * 3;
 								if(vertex.Length < lastVerticiesIndex){
 									Array.Resize<float>(ref vertex, lastVerticiesIndex);
-									Array.Resize<float>(ref uv, (lastIndex + toAdd[0].prim.Count) * 2);
+									Array.Resize<float>(ref uv, (lastIndex + toAdd[0].vertexCount) * 2);
 								}
 							}	
-							if(primCountDiff >= 0){ // Found a dispose to replace
-								fragmentedFloats -= toAdd[0].prim.Count;
-								toAdd[0].PutModelVertexIntoArray(ref vertex, disposed[i].prim.First * 3);
-								toAdd[0].PutModelUVIntoArray(ref uv, disposed[i].prim.First * 2);
-								bufferLowIndex = disposed[i].prim.First < bufferLowIndex ? disposed[i].prim.First : bufferLowIndex;
-								bufferHighIndex = (disposed[i].prim.First + toAdd[0].prim.Count) > bufferHighIndex ? 
-									(disposed[i].prim.First + toAdd[0].prim.Count) : bufferHighIndex;
-								toAdd[0].prim.First = disposed[i].prim.First;
-								if(primCountDiff > 0)
-									disposed[i].prim.First += toAdd[0].prim.Count;
+							if(vertexCountDiff >= 0){ // Found a dispose to replace
+								fragmentedFloats -= toAdd[0].vertexCount;
+								toAdd[0].PutModelVertexIntoArray(ref vertex, disposed[i].vertexIndex * 3);
+								toAdd[0].PutModelUVIntoArray(ref uv, disposed[i].vertexIndex * 2);
+								bufferLowIndex = disposed[i].vertexIndex < bufferLowIndex ? disposed[i].vertexIndex : bufferLowIndex;
+								bufferHighIndex = (disposed[i].vertexIndex + toAdd[0].vertexCount) > bufferHighIndex ? 
+									(disposed[i].vertexIndex + toAdd[0].vertexCount) : bufferHighIndex;
+								toAdd[0].vertexIndex = disposed[i].vertexIndex;
+								if(vertexCountDiff > 0)
+									disposed[i].vertexIndex += toAdd[0].vertexCount;
 								else
 									disposed.RemoveAt(i);
 								foundDisposable = true;
@@ -109,16 +112,16 @@ namespace Railtype_PSM_Engine.Entities{
 						if(lastIndex < 0)
 							lastIndex = 0;
 						else
-							lastIndex = (lastIndex + toAdd[0].prim.Count);
-						toAdd[0].prim.First = (ushort)lastIndex;
-						if(vertex.Length < (lastVerticiesIndex + toAdd[0].prim.Count * 3)){
-							Array.Resize<float>(ref vertex, (lastVerticiesIndex + toAdd[0].prim.Count * 3));	
-							Array.Resize<float>(ref uv, (lastVerticiesIndex + toAdd[0].prim.Count * 2));
+							lastIndex = (lastIndex + toAdd[0].vertexCount);
+						toAdd[0].vertexIndex = (ushort)lastIndex;
+						if(vertex.Length < (lastVerticiesIndex + toAdd[0].vertexCount * 3)){
+							Array.Resize<float>(ref vertex, (lastVerticiesIndex + toAdd[0].vertexCount * 3));	
+							Array.Resize<float>(ref uv, (lastVerticiesIndex + toAdd[0].vertexCount * 2));
 						}
-						toAdd[0].PutModelVertexIntoArray(ref vertex, toAdd[0].prim.First * 3);
-						toAdd[0].PutModelUVIntoArray(ref uv, toAdd[0].prim.First * 2);
-						bufferLowIndex = toAdd[0].prim.First < bufferLowIndex ? toAdd[0].prim.First : bufferLowIndex;
-						bufferHighIndex = toAdd[0].prim.First + toAdd[0].prim.Count;
+						toAdd[0].PutModelVertexIntoArray(ref vertex, toAdd[0].vertexIndex * 3);
+						toAdd[0].PutModelUVIntoArray(ref uv, toAdd[0].vertexIndex * 2);
+						bufferLowIndex = toAdd[0].vertexIndex < bufferLowIndex ? toAdd[0].vertexIndex : bufferLowIndex;
+						bufferHighIndex = toAdd[0].vertexIndex + toAdd[0].vertexCount;
 						lastVerticiesIndex = bufferHighIndex * 3;
 						newOnes++;
 					}
@@ -167,6 +170,7 @@ namespace Railtype_PSM_Engine.Entities{
 				//Matrix Array
 				Array.Copy(things[i].scalexyzrot, 0, thingShaderInfo, i * 7, 7);
 			}
+			
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
 		

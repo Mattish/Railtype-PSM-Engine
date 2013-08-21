@@ -8,7 +8,8 @@ namespace Railtype_PSM_Engine.Entities{
 	public class Thing{
 		
 		public float[] modelVertex, uv, scalexyzrot;
-		public int number;
+		public ushort[] indicies;
+		public int number, vertexCount, vertexIndex;
 		public Matrix4 modelToWorld;
 		public Primitive prim;
 		float rand1,rand2;
@@ -21,6 +22,16 @@ namespace Railtype_PSM_Engine.Entities{
 			scalexyzrot = new float[7]{1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
 			rand1 = (float)(Globals.random.NextDouble()*2)-1.0f;
 			rand2 = (float)(Globals.random.NextDouble()*2)-1.0f;
+			vertexIndex = 0;
+		}
+		
+		public Thing(Railtype_PSM_Engine.Util.WaveFrontObject wfo) : this(){
+			modelVertex = wfo.models[0].pos;
+			uv = wfo.models[0].uv;
+			indicies = wfo.models[0].indicies;
+			prim.Count = (ushort)indicies.Length;
+			prim.Mode = DrawMode.Triangles;
+			vertexCount = modelVertex.Length/3;
 		}
 
 		public Thing(ref float[] model, ref float[] _uv, int number) : this(){
@@ -44,7 +55,7 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public void update(){
-			scalexyzrot[3] = -5.0f;
+			scalexyzrot[3] = 5.0f;
 			scalexyzrot[1] += rand1*0.05f;
 			scalexyzrot[2] += rand2*0.05f;
 			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;
@@ -71,6 +82,10 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public void PutModelUVIntoArray(ref float[] input, int position){
 			Array.Copy(uv,0,input,position,uv.Length);	
+		}
+		
+		public void PutIndiciesIntoArray(ref ushort[] input, int position){
+			Array.Copy(indicies,0,input,position,indicies.Length);	
 		}
 
 	}

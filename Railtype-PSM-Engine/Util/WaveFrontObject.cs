@@ -1,22 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using Sce.PlayStation.Core;
 
 namespace Railtype_PSM_Engine.Util{
 	public class WaveFrontObject{
+		public struct Vertex : IEquatable<Vertex>{
+			public Vector3 pos, uv, normal;
 		
-		List<Vector3> vertex, uv, normals;
+		    public bool Equals(Vertex v2){
+		        return pos.Equals(v2.pos) &&
+				    uv.Equals(v2.uv) &&
+				    normal.Equals(v2.normal);
+		    }
+		}
+		
+		List<Vector3> pos, uv, normal;
 		List<string> lines;
 		public List<Model> models;
+		List<Vertex> vertexList;
 		public WaveFrontObject(string path){
-			vertex = new List<Vector3>();
+			pos = new List<Vector3>();
 			uv = new List<Vector3>();
-			normals = new List<Vector3>();
-			vertex.Add(Vector3.One);
+			normal = new List<Vector3>();
+			pos.Add(Vector3.One);
 			uv.Add(Vector3.One);
-			normals.Add(Vector3.One);
+			normal.Add(Vector3.One);
 			models = new List<Model>();
+			vertexList = new List<Vertex>();
 			lines = new List<string>(File.ReadAllLines(path));
 			Model currentModel = new Model();
 			char[] splitter = new char[]{' '}, splitter2 = new char[]{'/'};
@@ -34,27 +46,36 @@ namespace Railtype_PSM_Engine.Util{
 						currentModel.name = tmpStrings[1];
 						break;
 					case 'f': // Face
-						for(int j = 1; j < tmpStrings.Length; j++){ // For each faceVertex
+						Vertex tmpVertex = new Vertex();
+						for(int j = 1; j < 4; j++){ // For each faceVertex
 							faceVertex = tmpStrings[j].Split(splitter2);
 							if (faceVertex.Length > 0 && faceVertex[0].Length > 0){
-								currentModel._vertex.Add(vertex[int.Parse(faceVertex[0])].X);
-								currentModel._vertex.Add(vertex[int.Parse(faceVertex[0])].Y);
-								currentModel._vertex.Add(vertex[int.Parse(faceVertex[0])].Z);
+								tmpVertex.pos.X = pos[int.Parse(faceVertex[0])].X;
+								tmpVertex.pos.Y = pos[int.Parse(faceVertex[0])].Y;
+								tmpVertex.pos.Z = pos[int.Parse(faceVertex[0])].Z;
 							}
 							if (faceVertex.Length == 2){
-								currentModel._uv.Add(uv[int.Parse(faceVertex[1])].X);
-								currentModel._uv.Add(uv[int.Parse(faceVertex[1])].Y);
-								currentModel._uv.Add(uv[int.Parse(faceVertex[1])].Z);
+								tmpVertex.uv.X = uv[int.Parse(faceVertex[1])].X;
+								tmpVertex.uv.Y = uv[int.Parse(faceVertex[1])].Y;
 							}
 							if(faceVertex.Length == 3){
-								currentModel._normal.Add(normals[int.Parse(faceVertex[2])].X);
-								currentModel._normal.Add(normals[int.Parse(faceVertex[2])].Y);
+								tmpVertex.normal.X = normal[int.Parse(faceVertex[2])].X;
+								tmpVertex.normal.Y = normal[int.Parse(faceVertex[2])].Y;
+								tmpVertex.normal.Z = normal[int.Parse(faceVertex[2])].Z;
 								if (faceVertex[1].Length > 0){
-									currentModel._uv.Add(uv[int.Parse(faceVertex[1])].X);
-									currentModel._uv.Add(uv[int.Parse(faceVertex[1])].Y);
-									currentModel._uv.Add(uv[int.Parse(faceVertex[1])].Z);
+									tmpVertex.uv.X = uv[int.Parse(faceVertex[1])].X;
+									tmpVertex.uv.Y = uv[int.Parse(faceVertex[1])].Y;
 								}
 							}
+							//Does this vertex exist already?
+							int vertexLocation = -1;
+							if ((vertexLocation = vertexList.IndexOf(tmpVertex)) == -1){
+								vertexLocation = vertexList.Count;
+								vertexList.Add(tmpVertex);
+								currentModel._vertex.Add(vertexList[vertexLocation]);
+							}
+							currentModel._indicies.Add((ushort)vertexLocation);
+							
 						}
 						break;
 					case 'v': // Vertex
@@ -70,13 +91,13 @@ namespace Railtype_PSM_Engine.Util{
 								tmpVector3.X = float.Parse(tmpStrings[1]);
 								tmpVector3.Y = float.Parse(tmpStrings[2]);
 								tmpVector3.Z = float.Parse(tmpStrings[3]);
-								normals.Add(tmpVector3);
+								normal.Add(tmpVector3);
 								break;
 							case ' ': // Vertex
 								tmpVector3.X = float.Parse(tmpStrings[1]);
 								tmpVector3.Y = float.Parse(tmpStrings[2]);
 								tmpVector3.Z = float.Parse(tmpStrings[3]);
-								vertex.Add(tmpVector3);
+								pos.Add(tmpVector3);
 								break;
 						}
 						break;
@@ -88,20 +109,34 @@ namespace Railtype_PSM_Engine.Util{
 		
 		public class Model{
 			public string name;
-			public List<float> _vertex,_normal,_uv;
-			public float[] vertex, normal, uv;
+			public List<WaveFrontObject.Vertex> _vertex;
+			public float[] pos, normal, uv;
+			public ushort[] indicies;
+			public List<ushort> _indicies;
 			
 			public Model(){
-				_vertex = new List<float>(3);
-				_normal = new List<float>(3);
-				_uv = new List<float>(2);
+				_vertex = new List<Vertex>();
+				_indicies = new List<ushort>();
 				name = "ididntchangethename";
 			}
 			
 			public void finalize(){
-				vertex = _vertex.ToArray();
-				normal = _normal.ToArray();
-				uv = _uv.ToArray();
+				pos = new float[_vertex.Count*3];
+				normal = new float[_vertex.Count*3];
+				uv = new float[_vertex.Count*2];
+				for(int i = 0; i < _vertex.Count; i++){
+					pos[(i*3)] = _vertex[i].pos.X;
+					pos[(i*3)+1] = _vertex[i].pos.Y;
+					pos[(i*3)+2] = _vertex[i].pos.Z;
+					normal[(i*3)] = _vertex[i].normal.X;
+					normal[(i*3)+1] = _vertex[i].normal.Y;
+					normal[(i*3)+2] = _vertex[i].normal.Z;
+					uv[(i*2)] = _vertex[i].uv.X;
+					uv[(i*2)+1] = _vertex[i].uv.Y;
+				}
+				indicies = _indicies.ToArray();
+				_vertex.Clear();
+				_indicies.Clear();
 			}
 		}
 

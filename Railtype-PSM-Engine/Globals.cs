@@ -29,6 +29,14 @@ namespace Railtype_PSM_Engine{
 			thingManager = new ThingManager(graphic);
 			random = new Random();
  			cameraToWorld = Matrix4.Identity;
+			cameraToWorld *= Matrix4.RotationY((float)Math.PI);
+			Vector4 tmp = Vector4.One;
+			tmp.X = 0.0f;
+			tmp.Y = 0.0f;
+			tmp.Z = -10.0f;
+			cameraToWorld.RowW = tmp;
+			
+			
 
 			Vector3[] points = new Vector3[]{new Vector3(1,1,1),
 											new Vector3(1,1,0),
