@@ -20,4 +20,5 @@ I've done proper optimizations on packing data into the VBO and the likes. Frame
 
 ![](http://mattish.co.uk/github/example2.jpg)
 
-_400 textured cubes flying out from the center while rotating. Holds at 60 fps on the device_
+_400 textured cubes flying out from the center while rotating. Holds at 60 fps on the device.
+Can pumped up to 2000 cubes before hitting VBO limit, and as explained matrix per drawcall drops fps to about 25~ before it crashes_
