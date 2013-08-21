@@ -9,7 +9,8 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public float[] modelVertex, uv, scalexyzrot;
 		public ushort[] indicies;
-		public int number, vertexCount, vertexIndex;
+		public int number, vertexCount;
+		public ushort vertexIndex;
 		public Matrix4 modelToWorld;
 		public Primitive prim;
 		float rand1,rand2;
@@ -26,12 +27,15 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 		
 		public Thing(Railtype_PSM_Engine.Util.WaveFrontObject wfo) : this(){
-			modelVertex = wfo.models[0].pos;
-			uv = wfo.models[0].uv;
-			indicies = wfo.models[0].indicies;
+			modelVertex = new float[wfo.models[0].pos.Length];
+			Array.Copy(wfo.models[0].pos,modelVertex,modelVertex.Length);
+			uv = new float[wfo.models[0].uv.Length];
+			Array.Copy(wfo.models[0].uv,uv,uv.Length);
+			indicies = new ushort[wfo.models[0].indices.Length];
+			Array.Copy(wfo.models[0].indices,indicies,indicies.Length);
 			prim.Count = (ushort)indicies.Length;
 			prim.Mode = DrawMode.Triangles;
-			vertexCount = modelVertex.Length/3;
+			vertexCount = (ushort)(modelVertex.Length/3);
 		}
 
 		public Thing(ref float[] model, ref float[] _uv, int number) : this(){

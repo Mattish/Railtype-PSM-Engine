@@ -31,10 +31,10 @@ namespace Railtype_PSM_Engine{
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
-			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/ship9.obj");
+			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/cube.obj");
 			tm = new ThingManager(graphics);			
 			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
-			texture = new Texture2D("/Application/duck.png",false,PixelFormat.Rgba);
+			texture = new Texture2D("/Application/railgun.png",false,PixelFormat.Rgba);
 			
 			
 			//GPUSoft
@@ -65,12 +65,12 @@ namespace Railtype_PSM_Engine{
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Square)){
 				for(int i = 0; i < 10; i++){
-					//Globals.thingManager.AddThing(new Thing(ref wfo.models[0].vertex,ref wfo.models[0].uv,Globals.frameCount+i));
+					Globals.thingManager.AddThing(new Thing(wfo));
 				}
 			}
-			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle) && Globals.thingManager.ThingCount() == 0){
-				for(int i = 0; i < 180; i++){
-					Globals.thingManager.AddThing(new Thing(ref Globals.cubevertex,ref Globals.cubeuv,Globals.frameCount+i));
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
+				for(int i = 0; i < 100; i++){
+					Globals.thingManager.AddThing(new Thing(wfo));
 				}
 			}			
 			if (gpd.ButtonsDown.HasFlag(GamePadButtons.L)){

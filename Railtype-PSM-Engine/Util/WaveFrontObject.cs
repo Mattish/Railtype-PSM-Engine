@@ -74,7 +74,7 @@ namespace Railtype_PSM_Engine.Util{
 								vertexList.Add(tmpVertex);
 								currentModel._vertex.Add(vertexList[vertexLocation]);
 							}
-							currentModel._indicies.Add((ushort)vertexLocation);
+							currentModel._indices.Add((ushort)vertexLocation);
 							
 						}
 						break;
@@ -111,12 +111,12 @@ namespace Railtype_PSM_Engine.Util{
 			public string name;
 			public List<WaveFrontObject.Vertex> _vertex;
 			public float[] pos, normal, uv;
-			public ushort[] indicies;
-			public List<ushort> _indicies;
+			public ushort[] indices;
+			public List<ushort> _indices;
 			
 			public Model(){
 				_vertex = new List<Vertex>();
-				_indicies = new List<ushort>();
+				_indices = new List<ushort>();
 				name = "ididntchangethename";
 			}
 			
@@ -134,9 +134,9 @@ namespace Railtype_PSM_Engine.Util{
 					uv[(i*2)] = _vertex[i].uv.X;
 					uv[(i*2)+1] = _vertex[i].uv.Y;
 				}
-				indicies = _indicies.ToArray();
+				indices = _indices.ToArray();
 				_vertex.Clear();
-				_indicies.Clear();
+				_indices.Clear();
 			}
 		}
 

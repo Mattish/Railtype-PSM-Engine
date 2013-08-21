@@ -8,9 +8,9 @@ using System.Diagnostics;
 namespace Railtype_PSM_Engine.Entities{
 	public class ThingManager{
 		float[] vertex, matrixNumber, uv;
-		ushort[] indicies;
+		ushort[] indices;
 		GraphicsContext gc;
-		int fragmentedFloats, lastIndex, lastVerticiesIndex, fpsCounter;
+		int fragmentedFloats, fpsCounter;
 		long[] longestTook;
 		List<Thing> disposed, things, toAdd;
 		float[] thingShaderInfo;
@@ -27,12 +27,12 @@ namespace Railtype_PSM_Engine.Entities{
 			cameraToProjection = Matrix4.Perspective(FMath.Radians(30.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 			//cameraToProjection = Matrix4.Identity;
 			//cameraToProjection *= Matrix4.Ortho(-1f,1f,-1f,1f,1f,1000.0f);
-			lastIndex = -1;
-			lastVerticiesIndex = 0;
+			lastVertexIndex = lastIndexIndex = -1;
+			lastVerticiesIndex = lastIndiciesIndex = 0;
 			vertex = new float[(65000 * 3)];
 			uv = new float[(65000 * 2)];
 			matrixNumber = new float[65000];
-			indicies = new ushort[65000];
+			indices = new ushort[65000];
 			thingShaderInfo = new float[7];
 			
 			disposed = new List<Thing>();
@@ -68,83 +68,119 @@ namespace Railtype_PSM_Engine.Entities{
 			return false;
 		}
 		
-		int bufferLowIndex, bufferHighIndex, vertexCountDiff, fitIns, newOnes;
+		int vertexBufferLowIndex, vertexBufferHighIndex, vertexCountDiff, lastVertexIndex, lastVerticiesIndex;
+		int indexBufferLowIndex, indexBufferHighIndex, indexCountDiff, lastIndexIndex, lastIndiciesIndex;
+		
 
 		public void CheckNewThings(){
-			bufferLowIndex = int.MaxValue;
-			bufferHighIndex = vertexCountDiff = fitIns = newOnes = 0;
+			vertexBufferLowIndex = indexBufferLowIndex = int.MaxValue;
+			vertexBufferHighIndex = vertexCountDiff = indexBufferHighIndex = indexCountDiff = 0;
 			if(toAdd.Count > 0){ // Need to push things into main list
 				while(toAdd.Count > 0){
 					bool foundDisposable = false;
 					
 					if(disposed.Count > 0){
 						for(int i = 0; i < disposed.Count; i++){
-							//primCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
+							indexCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
 							vertexCountDiff = disposed[i].vertexCount - toAdd[0].vertexCount;
-							if(disposed[i].vertexIndex == lastIndex){ // if its the last prim in vertex array
-								vertexCountDiff = 0;
-								lastVerticiesIndex = (lastIndex + toAdd[0].vertexCount) * 3;
+							if(disposed[i].vertexIndex == lastVertexIndex){ // if its the last prim in vertex array
+								vertexCountDiff = indexCountDiff = 0;
+								
+								lastVerticiesIndex = (lastVertexIndex + toAdd[0].vertexCount) * 3;
+								lastIndiciesIndex = (lastIndexIndex + toAdd[0].prim.Count);
+								
 								if(vertex.Length < lastVerticiesIndex){
+									Array.Resize<ushort>(ref indices, lastIndiciesIndex);
 									Array.Resize<float>(ref vertex, lastVerticiesIndex);
-									Array.Resize<float>(ref uv, (lastIndex + toAdd[0].vertexCount) * 2);
+									Array.Resize<float>(ref uv, (lastVertexIndex + toAdd[0].vertexCount) * 2);
 								}
 							}	
 							if(vertexCountDiff >= 0){ // Found a dispose to replace
 								fragmentedFloats -= toAdd[0].vertexCount;
+								toAdd[0].vertexIndex = disposed[i].vertexIndex;
+								toAdd[0].prim.First = disposed[i].prim.First;
+								
+								
 								toAdd[0].PutModelVertexIntoArray(ref vertex, disposed[i].vertexIndex * 3);
 								toAdd[0].PutModelUVIntoArray(ref uv, disposed[i].vertexIndex * 2);
-								bufferLowIndex = disposed[i].vertexIndex < bufferLowIndex ? disposed[i].vertexIndex : bufferLowIndex;
-								bufferHighIndex = (disposed[i].vertexIndex + toAdd[0].vertexCount) > bufferHighIndex ? 
-									(disposed[i].vertexIndex + toAdd[0].vertexCount) : bufferHighIndex;
-								toAdd[0].vertexIndex = disposed[i].vertexIndex;
-								if(vertexCountDiff > 0)
-									disposed[i].vertexIndex += toAdd[0].vertexCount;
+								for(int ii = 0; ii < toAdd[0].indicies.Length; ii++)
+									toAdd[0].indicies[ii] += toAdd[0].vertexIndex;								
+								toAdd[0].PutIndiciesIntoArray(ref indices,disposed[i].prim.First);
+								// Set BufferLowIndex to index of where Disposed Index is
+								vertexBufferLowIndex = disposed[i].vertexIndex < vertexBufferLowIndex ? disposed[i].vertexIndex : vertexBufferLowIndex;
+								indexBufferLowIndex = disposed[i].prim.First < indexBufferLowIndex ? disposed[i].prim.First : indexBufferLowIndex;
+								// Set BufferHighIndex to index of where Disposed Index is + toAdd vertex/index count
+								vertexBufferHighIndex = (disposed[i].vertexIndex + toAdd[0].vertexCount) > vertexBufferHighIndex ? 
+									(disposed[i].vertexIndex + toAdd[0].vertexCount) : vertexBufferHighIndex;
+								indexBufferHighIndex = (disposed[i].prim.First + toAdd[0].prim.Count) > indexBufferHighIndex ?
+									(disposed[i].prim.First + toAdd[0].prim.Count) : indexBufferHighIndex;
+								
+								
+								if(vertexCountDiff > 0){
+									disposed[i].vertexIndex += (ushort)toAdd[0].vertexCount;
+									disposed[i].prim.First += toAdd[0].prim.Count;
+								}
 								else
 									disposed.RemoveAt(i);
 								foundDisposable = true;
-								fitIns++;
 								break;
 							}
 						}
 					}
 					
 					if(!foundDisposable){ // Cant find something to replace, add to the end of array
-						if(lastIndex < 0)
-							lastIndex = 0;
-						else
-							lastIndex = (lastIndex + toAdd[0].vertexCount);
-						toAdd[0].vertexIndex = (ushort)lastIndex;
+						if(lastVertexIndex < 0)
+							lastVertexIndex = lastIndexIndex = 0;
+						else{
+							lastVertexIndex = (lastVertexIndex + toAdd[0].vertexCount);
+							lastIndexIndex = (lastIndexIndex + toAdd[0].prim.Count);	
+						}
+						
+						toAdd[0].vertexIndex = (ushort)lastVertexIndex;
+						toAdd[0].prim.First = (ushort)lastIndexIndex;
+						
 						if(vertex.Length < (lastVerticiesIndex + toAdd[0].vertexCount * 3)){
 							Array.Resize<float>(ref vertex, (lastVerticiesIndex + toAdd[0].vertexCount * 3));	
 							Array.Resize<float>(ref uv, (lastVerticiesIndex + toAdd[0].vertexCount * 2));
+							Array.Resize<ushort>(ref indices, (lastIndiciesIndex + toAdd[0].prim.Count));
 						}
+						
 						toAdd[0].PutModelVertexIntoArray(ref vertex, toAdd[0].vertexIndex * 3);
 						toAdd[0].PutModelUVIntoArray(ref uv, toAdd[0].vertexIndex * 2);
-						bufferLowIndex = toAdd[0].vertexIndex < bufferLowIndex ? toAdd[0].vertexIndex : bufferLowIndex;
-						bufferHighIndex = toAdd[0].vertexIndex + toAdd[0].vertexCount;
-						lastVerticiesIndex = bufferHighIndex * 3;
-						newOnes++;
+						
+						for(int i = 0; i < toAdd[0].indicies.Length; i++)
+							toAdd[0].indicies[i] += toAdd[0].vertexIndex;
+						toAdd[0].PutIndiciesIntoArray(ref indices, toAdd[0].prim.First);
+						
+						vertexBufferLowIndex = toAdd[0].vertexIndex < vertexBufferLowIndex ? toAdd[0].vertexIndex : vertexBufferLowIndex;
+						indexBufferLowIndex = toAdd[0].prim.First < indexBufferLowIndex ? toAdd[0].prim.First : indexBufferLowIndex;
+						
+						vertexBufferHighIndex = toAdd[0].vertexIndex + toAdd[0].vertexCount;
+						indexBufferHighIndex = toAdd[0].prim.First + toAdd[0].prim.Count;
+						
+						lastVerticiesIndex = vertexBufferHighIndex * 3;
+						lastIndiciesIndex = indexBufferHighIndex;
 					}
 					things.Add(toAdd[0]);
-					toAdd.RemoveAt(0);
-					
+					toAdd.RemoveAt(0);	
 				}
-				
-				Console.WriteLine("fitIns:" + fitIns + " - newOnes:" + newOnes);
 			}
 		}
 		
 		void CheckVertexBuffer(){
 			int vertexCount = vertex.Length / 3;
+			int indexCount = indices.Length;
+			
 			if(Globals.modelVertexBuffer == null)
-				Globals.modelVertexBuffer = new VertexBuffer(vertexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
+				Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
 			else if(Globals.modelVertexBuffer.VertexCount < vertexCount){
 					Globals.modelVertexBuffer.Dispose();
-					Globals.modelVertexBuffer = new VertexBuffer(vertexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
+					Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
 				}
-			if(bufferLowIndex != int.MaxValue){
-				Globals.modelVertexBuffer.SetVertices(0, vertex, bufferLowIndex, bufferLowIndex, bufferHighIndex - bufferLowIndex);
-				Globals.modelVertexBuffer.SetVertices(1, uv, bufferLowIndex, bufferLowIndex, bufferHighIndex - bufferLowIndex);
+			if(vertexBufferLowIndex != int.MaxValue){
+				Globals.modelVertexBuffer.SetVertices(0, vertex, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
+				Globals.modelVertexBuffer.SetVertices(1, uv, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
+				Globals.modelVertexBuffer.SetIndices(indices,indexBufferLowIndex,indexBufferLowIndex,indexBufferHighIndex - indexBufferLowIndex);
 				int position = 0;
 				
 				if(prims.Length < things.Count){
@@ -158,8 +194,8 @@ namespace Railtype_PSM_Engine.Entities{
 				for(int i = 0; i < things.Count; i++){
 					//MatrixNumber Array
 					float[] number = new float[]{(i % Globals.AmountPerPush)};
-					ArrayFillComplex(ref matrixNumber, position, ref number, things[i].prim.Count);
-					position += things[i].prim.Count;		
+					ArrayFillComplex(ref matrixNumber, position, ref number, things[i].vertexCount);
+					position += things[i].vertexCount;		
 				}
 				Globals.modelVertexBuffer.SetVertices(2, matrixNumber, 0, 0, matrixNumber.Length);
 			}
@@ -170,7 +206,10 @@ namespace Railtype_PSM_Engine.Entities{
 				//Matrix Array
 				Array.Copy(things[i].scalexyzrot, 0, thingShaderInfo, i * 7, 7);
 			}
-			
+			/*Globals.modelVertexBuffer.SetVertices(0, vertex);
+			Globals.modelVertexBuffer.SetVertices(1, uv);
+			Globals.modelVertexBuffer.SetVertices(2, matrixNumber);
+			Globals.modelVertexBuffer.SetIndices(indicies);*/
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
 		
