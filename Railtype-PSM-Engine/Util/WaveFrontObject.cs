@@ -5,22 +5,25 @@ using System.IO;
 using Sce.PlayStation.Core;
 
 namespace Railtype_PSM_Engine.Util{
+	public struct Vertex : IEquatable<Vertex>{
+		public Vector3 pos, uv, normal;
+	
+	    public bool Equals(Vertex v2){
+	        return pos.Equals(v2.pos) &&
+			    uv.Equals(v2.uv) &&
+			    normal.Equals(v2.normal);
+	    }
+	}
+	
 	public class WaveFrontObject{
-		public struct Vertex : IEquatable<Vertex>{
-			public Vector3 pos, uv, normal;
-		
-		    public bool Equals(Vertex v2){
-		        return pos.Equals(v2.pos) &&
-				    uv.Equals(v2.uv) &&
-				    normal.Equals(v2.normal);
-		    }
-		}
 		
 		List<Vector3> pos, uv, normal;
 		List<string> lines;
 		public List<Model> models;
 		List<Vertex> vertexList;
+		Dictionary<string,ushort> vertexDict;
 		public WaveFrontObject(string path){
+			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 			pos = new List<Vector3>();
 			uv = new List<Vector3>();
 			normal = new List<Vector3>();
@@ -30,10 +33,12 @@ namespace Railtype_PSM_Engine.Util{
 			models = new List<Model>();
 			vertexList = new List<Vertex>();
 			lines = new List<string>(File.ReadAllLines(path));
+			vertexDict = new Dictionary<string, ushort>(lines.Count/2);
 			Model currentModel = new Model();
 			char[] splitter = new char[]{' '}, splitter2 = new char[]{'/'};
 			Vector3 tmpVector3 = new Vector3(0.0f,0.0f,0.0f);
 			string[] tmpStrings, faceVertex;
+			
 			for(int i = 0; i < lines.Count; i++){
 				if (lines[i].Length < 2)
 					continue;
@@ -48,6 +53,7 @@ namespace Railtype_PSM_Engine.Util{
 					case 'f': // Face
 						Vertex tmpVertex = new Vertex();
 						for(int j = 1; j < 4; j++){ // For each faceVertex
+							sw.Start();							
 							faceVertex = tmpStrings[j].Split(splitter2);
 							if (faceVertex.Length > 0 && faceVertex[0].Length > 0){
 								tmpVertex.pos.X = pos[int.Parse(faceVertex[0])].X;
@@ -68,15 +74,18 @@ namespace Railtype_PSM_Engine.Util{
 								}
 							}
 							//Does this vertex exist already?
-							int vertexLocation = -1;
-							if ((vertexLocation = vertexList.IndexOf(tmpVertex)) == -1){
-								vertexLocation = vertexList.Count;
+							ushort vertexLocation;
+							if (!vertexDict.TryGetValue(tmpStrings[j],out vertexLocation)){
+								vertexLocation = (ushort)vertexList.Count;
+								vertexDict.Add(tmpStrings[j],vertexLocation);
 								vertexList.Add(tmpVertex);
 								currentModel._vertex.Add(vertexList[vertexLocation]);
 							}
-							currentModel._indices.Add((ushort)vertexLocation);
+							sw.Stop();
+							currentModel._indices.Add(vertexLocation);
 							
 						}
+						
 						break;
 					case 'v': // Vertex
 						switch(lines[i][1]){
@@ -103,13 +112,16 @@ namespace Railtype_PSM_Engine.Util{
 						break;
 				}
 			}
+			
+			Console.WriteLine("Everything but finalize took:" + sw.ElapsedMilliseconds);
 			foreach(Model m in models)
 				m.finalize();
 		}
-		
-		public class Model{
+	}
+	
+	public class Model{
 			public string name;
-			public List<WaveFrontObject.Vertex> _vertex;
+			public List<Vertex> _vertex;
 			public float[] pos, normal, uv;
 			public ushort[] indices;
 			public List<ushort> _indices;
@@ -121,6 +133,8 @@ namespace Railtype_PSM_Engine.Util{
 			}
 			
 			public void finalize(){
+				System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+				sw.Start();
 				pos = new float[_vertex.Count*3];
 				normal = new float[_vertex.Count*3];
 				uv = new float[_vertex.Count*2];
@@ -137,9 +151,9 @@ namespace Railtype_PSM_Engine.Util{
 				indices = _indices.ToArray();
 				_vertex.Clear();
 				_indices.Clear();
+			sw.Stop();
+			Console.WriteLine("finalizing took:" + sw.ElapsedMilliseconds);
 			}
 		}
-
-	}
 }
 

@@ -10,17 +10,15 @@ namespace Railtype_PSM_Engine.Entities{
 		public float[] modelVertex, uv, scalexyzrot;
 		public ushort[] indicies;
 		public int number, vertexCount;
-		public ushort vertexIndex;
 		public Matrix4 modelToWorld;
+		public ushort vertexIndex;
 		public Primitive prim;
 		float rand1,rand2;
-		public bool updated;
 		
 
 		Thing(){
-			updated = false;
-			modelToWorld = Matrix4.Identity;
 			scalexyzrot = new float[7]{1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
+			modelToWorld = Matrix4.Identity;
 			rand1 = (float)(Globals.random.NextDouble()*2)-1.0f;
 			rand2 = (float)(Globals.random.NextDouble()*2)-1.0f;
 			vertexIndex = 0;
@@ -38,46 +36,34 @@ namespace Railtype_PSM_Engine.Entities{
 			vertexCount = (ushort)(modelVertex.Length/3);
 		}
 
-		public Thing(ref float[] model, ref float[] _uv, int number) : this(){
-			this.number = number;
-			modelVertex = model;
-			uv = _uv;
-			prim.Count = (ushort)(model.Length / 3);
-			prim.Mode = DrawMode.Triangles;
-		}
-
-		public Thing(int amountOfVertex, int number) : this(){
-			modelVertex = new float[amountOfVertex * 3];
-			this.number = number;
-			for(int i = 0; i < modelVertex.Length; i+=3){
-				modelVertex[i] = (float)Globals.random.NextDouble();
-				modelVertex[i + 1] = (float)Globals.random.NextDouble();
-				modelVertex[i + 2] = (float)Globals.random.NextDouble();
-			}
-			prim.Count = (ushort)(modelVertex.Length / 3);
-			prim.Mode = DrawMode.Triangles;
-		}
-
-		public void update(){
-			scalexyzrot[3] = 5.0f;
+		public virtual void Update(){
+			scalexyzrot[3] = 15.0f;
 			scalexyzrot[1] += rand1*0.05f;
 			scalexyzrot[2] += rand2*0.05f;
 			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;
+			UpdateModelToWorld(false);
 		}
 		
 		Vector4 tmp;
 		Matrix4 tmpMatrix;
-		private Matrix4 UpdateModelToWorld(){
-			Matrix4.RotationXyz(scalexyzrot[4], scalexyzrot[5], scalexyzrot[6], out modelToWorld);	
-			Matrix4.Scale(scalexyzrot[0], scalexyzrot[0], scalexyzrot[0], out tmpMatrix);
-			modelToWorld *= tmpMatrix;
-			tmp.X = scalexyzrot[1];
-			tmp.Y = scalexyzrot[2];
-			tmp.Z = scalexyzrot[3];
-			tmp.W = 1;
-			modelToWorld.RowW = tmp;
-			modelToWorld = modelToWorld.Transpose();
-			return modelToWorld;
+		protected void UpdateModelToWorld(bool cpu){
+			if (cpu){
+				Matrix4.RotationXyz(scalexyzrot[4], scalexyzrot[5], scalexyzrot[6], out modelToWorld);	
+				Matrix4.Scale(scalexyzrot[0], scalexyzrot[0], scalexyzrot[0], out tmpMatrix);
+				modelToWorld *= tmpMatrix;
+				tmp.X = scalexyzrot[1];
+				tmp.Y = scalexyzrot[2];
+				tmp.Z = scalexyzrot[3];
+				tmp.W = 1;
+				modelToWorld.RowW = tmp;
+				modelToWorld = modelToWorld.Transpose();
+			}
+			else{
+				modelToWorld.ColumnX = new Vector4(scalexyzrot[0],	scalexyzrot[0],scalexyzrot[0],0);
+				modelToWorld.ColumnY = new Vector4(scalexyzrot[1],	scalexyzrot[2],scalexyzrot[3],0);
+				modelToWorld.ColumnZ = new Vector4(scalexyzrot[4],	scalexyzrot[5],scalexyzrot[6],0);
+				modelToWorld.ColumnW = new Vector4(0,0,0,0);	
+			}
 		}
 
 		public void PutModelVertexIntoArray(ref float[] input, int position){

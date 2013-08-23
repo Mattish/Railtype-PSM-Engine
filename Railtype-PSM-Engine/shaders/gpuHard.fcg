@@ -6,8 +6,5 @@ void main( float4 out Color : COLOR,
 {
 	//Color = float4(1.0f,0.0f,0.0f,1.0f);
 	float4 tmpColor = tex2D(Texture0, _uv);
-	if (tmpColor[0] > 0.9f && tmpColor[1] > 0.9f && tmpColor[2] > 0.9f)
-		Color = float4(0.0f,0.0f,0.0f,0.0f);
-	else
-		Color = tmpColor;
+	Color = tmpColor;
 }
