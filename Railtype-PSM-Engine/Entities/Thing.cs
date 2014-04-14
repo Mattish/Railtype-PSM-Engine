@@ -9,11 +9,12 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public float[] modelVertex, uv, scalexyzrot;
 		public ushort[] indicies;
-		public int number, vertexCount;
+		public int number, vertexCount, textureNumber;
 		public Matrix4 modelToWorld;
 		public ushort vertexIndex;
 		public Primitive prim;
-		float rand1,rand2;
+		public float rand1,rand2;
+		public bool draw;
 		
 
 		Thing(){
@@ -37,11 +38,12 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 
 		public virtual void Update(){
-			scalexyzrot[3] = 15.0f;
+			//scalexyzrot[3] = 150.0f * rand1;
+			/*scalexyzrot[3] = 20.0f;
 			scalexyzrot[1] += rand1*0.05f;
 			scalexyzrot[2] += rand2*0.05f;
-			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;
-			UpdateModelToWorld(false);
+			scalexyzrot[4] = scalexyzrot[5] += rand1*0.05f;*/
+			UpdateModelToWorld(true);
 		}
 		
 		Vector4 tmp;
@@ -56,7 +58,7 @@ namespace Railtype_PSM_Engine.Entities{
 				tmp.Z = scalexyzrot[3];
 				tmp.W = 1;
 				modelToWorld.RowW = tmp;
-				modelToWorld = modelToWorld.Transpose();
+				//modelToWorld = modelToWorld.Transpose(); ??????
 			}
 			else{
 				modelToWorld.ColumnX = new Vector4(scalexyzrot[0],	scalexyzrot[0],scalexyzrot[0],0);

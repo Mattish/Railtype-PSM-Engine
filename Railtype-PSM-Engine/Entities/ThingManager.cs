@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using Railtype_PSM_Engine.Entities;
 using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core;
@@ -11,37 +12,36 @@ namespace Railtype_PSM_Engine.Entities{
 		ushort[] indices;
 		GraphicsContext gc;
 		int fragmentedFloats, fpsCounter;
-		long[] longestTook;
 		List<Thing> disposed, things, toAdd;
-		//float[] thingShaderInfo;
-		Matrix4[] matrixForShader;
+		Matrix4[][] matricesForShader;
 		Matrix4 cameraToProjection;
-		Primitive[] prims;
+		Primitive[][] prims;
 		Stopwatch sw;
+		
+		int vertexBufferLowIndex, vertexBufferHighIndex, vertexCountDiff, lastVertexIndex, lastVerticiesIndex;
+		int indexBufferLowIndex, indexBufferHighIndex, indexCountDiff, lastIndexIndex, lastIndiciesIndex;
 					
 		public ThingManager(GraphicsContext gc_){
 			sw = new Stopwatch();
 			gc = gc_;
 			fragmentedFloats = 0;
-			longestTook = new long[10];
 			fpsCounter = 0;
-			//cameraToProjection = Matrix4.Perspective(FMath.Radians(30.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
+			//cameraToProjection = Matrix4.Perspective(FMath.Radians(1.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 			cameraToProjection = Matrix4.Identity;
-			cameraToProjection *= Matrix4.Ortho(-gc.Screen.AspectRatio,gc.Screen.AspectRatio
-			                                    ,-1.0f,1.0f,1.0f,1000.0f);
+			cameraToProjection *= Matrix4.Ortho(-gc.Screen.AspectRatio,gc.Screen.AspectRatio,
+			                                   -1.0f,1.0f,1.0f,1000.0f);
 			lastVertexIndex = lastIndexIndex = -1;
 			lastVerticiesIndex = lastIndiciesIndex = 0;
 			vertex = new float[(ushort.MaxValue * 3)];
 			uv = new float[(ushort.MaxValue * 2)];
 			matrixNumber = new float[ushort.MaxValue];
 			indices = new ushort[ushort.MaxValue];
-			//thingShaderInfo = new float[7];
-			matrixForShader = new Matrix4[10];
+			matricesForShader = new Matrix4[8][];
 			
 			disposed = new List<Thing>();
 			things = new List<Thing>();
 			toAdd = new List<Thing>();
-			prims = new Primitive[1];
+			prims = new Primitive[8][];
 			sw.Start();
 		}
 		
@@ -70,18 +70,13 @@ namespace Railtype_PSM_Engine.Entities{
 			}
 			return false;
 		}
-		
-		int vertexBufferLowIndex, vertexBufferHighIndex, vertexCountDiff, lastVertexIndex, lastVerticiesIndex;
-		int indexBufferLowIndex, indexBufferHighIndex, indexCountDiff, lastIndexIndex, lastIndiciesIndex;
-		
 
-		public void CheckNewThings(){
+		private void CheckNewThings(){
 			vertexBufferLowIndex = indexBufferLowIndex = int.MaxValue;
 			vertexBufferHighIndex = vertexCountDiff = indexBufferHighIndex = indexCountDiff = 0;
 			if(toAdd.Count > 0){ // Need to push things into main list
 				while(toAdd.Count > 0){
 					bool foundDisposable = false;
-					
 					if(disposed.Count > 0){
 						for(int i = 0; i < disposed.Count; i++){
 							indexCountDiff = disposed[i].prim.Count - toAdd[0].prim.Count;
@@ -108,7 +103,7 @@ namespace Railtype_PSM_Engine.Entities{
 								toAdd[0].PutModelUVIntoArray(ref uv, disposed[i].vertexIndex * 2);
 								for(int ii = 0; ii < toAdd[0].indicies.Length; ii++)
 									toAdd[0].indicies[ii] += toAdd[0].vertexIndex;								
-								toAdd[0].PutIndiciesIntoArray(ref indices,disposed[i].prim.First);
+								toAdd[0].PutIndiciesIntoArray(ref indices, disposed[i].prim.First);
 								
 								// Set BufferLowIndex to index of where Disposed Index is
 								vertexBufferLowIndex = disposed[i].vertexIndex < vertexBufferLowIndex ? disposed[i].vertexIndex : vertexBufferLowIndex;
@@ -123,8 +118,7 @@ namespace Railtype_PSM_Engine.Entities{
 								if(vertexCountDiff > 0){
 									disposed[i].vertexIndex += (ushort)toAdd[0].vertexCount;
 									disposed[i].prim.First += toAdd[0].prim.Count;
-								}
-								else
+								} else
 									disposed.RemoveAt(i);
 								foundDisposable = true;
 								break;
@@ -171,7 +165,7 @@ namespace Railtype_PSM_Engine.Entities{
 			}
 		}
 		
-		void CheckVertexBuffer(){
+		private void CheckVertexBuffer(){
 			int vertexCount = vertex.Length / 3;
 			int indexCount = indices.Length;
 			
@@ -184,37 +178,38 @@ namespace Railtype_PSM_Engine.Entities{
 			if(vertexBufferLowIndex != int.MaxValue){
 				Globals.modelVertexBuffer.SetVertices(0, vertex, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
 				Globals.modelVertexBuffer.SetVertices(1, uv, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
-				Globals.modelVertexBuffer.SetIndices(indices,indexBufferLowIndex,indexBufferLowIndex,indexBufferHighIndex - indexBufferLowIndex);
-				
-				
-				if(prims.Length < things.Count){
-					prims = new Primitive[things.Count];
-					//Array.Resize<float>(ref thingShaderInfo, things.Count * 7);
-					Array.Resize<Matrix4>(ref matrixForShader, things.Count);
+				Globals.modelVertexBuffer.SetIndices(indices, indexBufferLowIndex, indexBufferLowIndex, indexBufferHighIndex - indexBufferLowIndex);
+			}
+			
+			int[] thingtextureBufferCounts = new int[8];
+			for(int i = 0; i < things.Count; i++){
+				int bufferNumber = Globals.textureManager.textureToBufferList[things[i].textureNumber];
+				thingtextureBufferCounts[bufferNumber]++;
+			}
+			
+			for(int textureBufferNo = 0; textureBufferNo < 8; textureBufferNo++){
+				if (thingtextureBufferCounts[textureBufferNo] > 0){
+					prims[textureBufferNo] = new Primitive[thingtextureBufferCounts[textureBufferNo]];
+					matricesForShader[textureBufferNo] = new Matrix4[thingtextureBufferCounts[textureBufferNo]];
 				}
+			}
+			
+			thingtextureBufferCounts = new int[8];
+			for(int i = 0; i < things.Count; i++){
+				int tmpBufferNumber = Globals.textureManager.textureToBufferList[things[i].textureNumber];
+				prims[tmpBufferNumber][thingtextureBufferCounts[tmpBufferNumber]] = things[i].prim;
+				
+				//Matrix Array
+				matricesForShader[tmpBufferNumber][thingtextureBufferCounts[tmpBufferNumber]] = things[i].modelToWorld;
 				
 				if(matrixNumber.Length < vertex.Length / 3)
-					matrixNumber = new float[vertex.Length / 3];
+					matrixNumber = new float[vertex.Length / 3];	
 				
-				for(int i = 0; i < things.Count; i++){
-					//MatrixNumber Array
-					float[] number = new float[]{(i % Globals.AmountPerPush)};
-					ArrayFillComplex(ref matrixNumber, things[i].vertexIndex, ref number, things[i].vertexCount);		
-				}
-				Globals.modelVertexBuffer.SetVertices(2, matrixNumber, 0, 0, matrixNumber.Length);
+				float[] number = new float[]{(thingtextureBufferCounts[tmpBufferNumber] % Globals.AmountPerPush)};
+				ArrayFillComplex(ref matrixNumber, things[i].vertexIndex, ref number, things[i].vertexCount);	
+				thingtextureBufferCounts[tmpBufferNumber]++;
 			}
-			prims = new Primitive[things.Count];
-			for(int i = 0; i < things.Count; i++){
-				//Prim Array
-				prims[i] = things[i].prim;		
-				//Matrix Array
-				//Array.Copy(things[i].scalexyzrot, 0, thingShaderInfo, i * 7, 7);
-				matrixForShader[i] = things[i].modelToWorld;
-			}
-			/*Globals.modelVertexBuffer.SetVertices(0, vertex);
-			Globals.modelVertexBuffer.SetVertices(1, uv);
-			Globals.modelVertexBuffer.SetVertices(2, matrixNumber);
-			Globals.modelVertexBuffer.SetIndices(indicies);*/
+			Globals.modelVertexBuffer.SetVertices(2, matrixNumber, 0, 0, matrixNumber.Length);
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
 		
@@ -224,63 +219,68 @@ namespace Railtype_PSM_Engine.Entities{
 			sww.Start();
 			CheckNewThings();
 			sww.Stop();
-			longestTook[0] = sww.ElapsedMilliseconds > longestTook[0] ? sww.ElapsedMilliseconds : longestTook[0];
 			if(sw.ElapsedMilliseconds > 1000)
-				Console.WriteLine("CheckNewThings():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[0] + "ms");
+				Console.WriteLine("CheckNewThings():" + sww.ElapsedMilliseconds + "ms");
 			sww.Reset();
 			sww.Start();
+			
 			foreach(Thing thing in things){
 				thing.Update();	
 			}
 			sww.Stop();
-			longestTook[1] = sww.ElapsedMilliseconds > longestTook[1] ? sww.ElapsedMilliseconds : longestTook[1];
+			
 			if(sw.ElapsedMilliseconds > 1000)
-				Console.WriteLine("foreach update:" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[1] + "ms");
+				Console.WriteLine("foreach update:" + sww.ElapsedMilliseconds + "ms");
 			sww.Reset();
 			sww.Start();			
 			CheckVertexBuffer();		
 			sww.Stop();
-			longestTook[2] = sww.ElapsedMilliseconds > longestTook[2] ? sww.ElapsedMilliseconds : longestTook[2];
+			
 			if(sw.ElapsedMilliseconds > 1000)
-				Console.WriteLine("CheckVertexBuffer():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[2] + "ms");
+				Console.WriteLine("CheckVertexBuffer():" + sww.ElapsedMilliseconds + "ms");
 		}
 		
 		public void Draw(){
 			Stopwatch sww = new Stopwatch();
-			sww.Start();
+			Stopwatch setUniformWatch = new Stopwatch();
 			Matrix4 VP = buildProjectionMatrix(ref gc); // Build camera to world projection			
-			if(Globals.COMPUTE_BY == Globals.COMPUTATION_TYPE.GPU_SOFT){ // Pushing Matricies to shader as uniform
-				gc.SetShaderProgram(Globals.gpuHard);
-				int k = Globals.gpuHard.FindUniform("WorldViewProj");
-				Globals.gpuHard.SetUniformValue(k, ref VP);
-				int primCounter = 0, HowManyToPush = 0;
-				while(primCounter < prims.Length){
-					HowManyToPush = prims.Length - primCounter > Globals.AmountPerPush ? Globals.AmountPerPush : prims.Length - primCounter;
-					k = Globals.gpuHard.FindUniform("modelToWorld");
-					Globals.gpuHard.SetUniformValue(k, matrixForShader, 0, primCounter, HowManyToPush);			
-					//k = Globals.gpuHard.FindUniform("scalexyzrot");
-					//Globals.gpuHard.SetUniformValue(k, thingShaderInfo, 0, primCounter * 7, HowManyToPush * 7);			
-					gc.DrawArrays(prims, primCounter, HowManyToPush);
-					primCounter += HowManyToPush;
+			gc.SetShaderProgram(Globals.gpuHard);
+			int k = Globals.gpuHard.FindUniform("WorldViewProj");
+			Globals.gpuHard.SetUniformValue(k, ref VP);
+			for(int bufferNumber = 0; bufferNumber < 8; bufferNumber++){
+				k = Globals.gpuHard.FindUniform("textureNumber");
+				Globals.gpuHard.SetUniformValue(k, bufferNumber);
+				if (prims[bufferNumber] != null){
+					int primCounter = 0, HowManyToPush = 0;
+					while(primCounter < prims[bufferNumber].Length){
+						HowManyToPush = prims[bufferNumber].Length - primCounter > Globals.AmountPerPush ? Globals.AmountPerPush : prims[bufferNumber].Length - primCounter;
+						setUniformWatch.Start();
+						k = Globals.gpuHard.FindUniform("modelToWorld");
+						Globals.gpuHard.SetUniformValue(k, matricesForShader[bufferNumber], 0, primCounter, HowManyToPush);
+						setUniformWatch.Stop();
+						sww.Start();
+						gc.DrawArrays(prims[bufferNumber], primCounter,HowManyToPush);
+						sww.Stop();
+						primCounter += HowManyToPush;
+					}
 				}
 			}
-			sww.Stop();
-			longestTook[3] = sww.ElapsedMilliseconds > longestTook[3] ? sww.ElapsedMilliseconds : longestTook[3];
+			
 			if(sw.ElapsedMilliseconds > 1000){
-				Console.WriteLine("Draw():" + sww.ElapsedMilliseconds + "ms - longest:" + longestTook[3] + "ms");
-				Console.WriteLine(Globals.COMPUTE_BY.ToString() + " - Amount of Things:" + ThingCount() + " - fps:" + fpsCounter + " Memory usage: " + (GC.GetTotalMemory(true) / 1024) + "KB");
+				Console.WriteLine("Draw:" + sww.ElapsedMilliseconds + "ms");
+				Console.WriteLine("settingUniform:" + setUniformWatch.ElapsedMilliseconds + "ms");
+				Console.WriteLine("Amount of Things:" + ThingCount() + " - fps:" + fpsCounter + " Memory usage: " + (GC.GetTotalMemory(true) / 1024) + "KB");
 				fpsCounter = 0;
 				sw.Reset();
 				sw.Start();
 			}
 			fpsCounter++;
 			Globals.frameCount++;
-			longestTook = new long[10];
 		}
 		
 		//Tweaked version of this to allow for positional inserts
 		//http://coding.grax.com/2013/06/fast-array-fill-function-revisited.html}
-		public void ArrayFillComplex<T>(ref T[] arrayToFill, int destinationIndex, ref T[] fillValue, int count){
+		private void ArrayFillComplex<T>(ref T[] arrayToFill, int destinationIndex, ref T[] fillValue, int count){
 			Array.Copy(fillValue, 0, arrayToFill, destinationIndex, fillValue.Length);
 			int arrayToFillHalfLength = count / 2;
 		 
@@ -293,7 +293,7 @@ namespace Railtype_PSM_Engine.Entities{
 			}
 		}
 		
-		public Matrix4 buildProjectionMatrix(ref GraphicsContext gc){
+		private Matrix4 buildProjectionMatrix(ref GraphicsContext gc){
 			Matrix4 worldToCamera;
 			Globals.cameraToWorld.Inverse(out worldToCamera);
 			Matrix4 tmp = worldToCamera * cameraToProjection;

@@ -1,6 +1,7 @@
 # Visual Studio artifacts
 bin
 obj
+images
 *.user
 *.suo
 *.vsp
@@ -40,3 +41,4 @@ Help
 
 # Other
 artifacts
+

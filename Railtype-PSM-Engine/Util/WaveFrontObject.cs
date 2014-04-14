@@ -35,6 +35,7 @@ namespace Railtype_PSM_Engine.Util{
 			lines = new List<string>(File.ReadAllLines(path));
 			vertexDict = new Dictionary<string, ushort>(lines.Count/2);
 			Model currentModel = new Model();
+			//models.Add(currentModel);
 			char[] splitter = new char[]{' '}, splitter2 = new char[]{'/'};
 			Vector3 tmpVector3 = new Vector3(0.0f,0.0f,0.0f);
 			string[] tmpStrings, faceVertex;

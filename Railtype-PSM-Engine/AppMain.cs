@@ -15,7 +15,6 @@ namespace Railtype_PSM_Engine{
 		public Texture2D texture;
 		Railtype_PSM_Engine.Util.WaveFrontObject wfo;
 		Stopwatch sw;
-		
 		ThingManager tm;
  
 		public static void Main(string[] args){
@@ -31,13 +30,17 @@ namespace Railtype_PSM_Engine{
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
-			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/cube.obj");
+			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/objects/square.obj");
 			tm = new ThingManager(graphics);			
-			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHard.cgx");		
-			texture = new Texture2D("/Application/railgun.png",false,PixelFormat.Rgba);
+			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHardBase.cgx");		
+			Globals.textureManager.TryAddTexture("railgun.png");
+			Globals.textureManager.TryAddTexture("marisa.png");
+			Globals.textureManager.TryAddTexture("uiharu.png");
+			Globals.textureManager.TryAddTexture("squareborder.png");
+			Globals.textureManager.TryAddTexture("skybox.png");
+			Globals.textureManager.TryAddTexture("test.png");
 			
-			
-			//GPUSoft
+			//GPUHard
 			Globals.gpuHard.SetAttributeBinding(0, "a_Position");			
 			Globals.gpuHard.SetAttributeBinding(1, "uv");
 			Globals.gpuHard.SetAttributeBinding(2, "matrixNumber");
@@ -45,14 +48,38 @@ namespace Railtype_PSM_Engine{
 			Globals.gpuHard.SetUniformBinding(k, "WorldViewProj");			
 			k = Globals.gpuHard.FindUniform("modelToWorld");
 			Globals.gpuHard.SetUniformBinding(k, "modelToWorld");
+			k = Globals.gpuHard.FindUniform("modelToWorld");
+			Globals.gpuHard.SetUniformBinding(k, "modelToWorld");
 			
 			sw = new Stopwatch();
 			sw.Start();
-			//graphics.Enable (EnableMode.Blend);
-			graphics.Enable (EnableMode.CullFace);
-			graphics.Enable (EnableMode.DepthTest);
-			graphics.SetBlendFunc(new BlendFunc(BlendFuncMode.Add,BlendFuncFactor.SrcAlpha,BlendFuncFactor.OneMinusSrcAlpha));
-			graphics.SetTexture(0,texture);
+			graphics.Enable(EnableMode.Blend);
+			//graphics.Enable (EnableMode.CullFace);
+			graphics.Enable(EnableMode.DepthTest);
+			graphics.SetBlendFunc(new BlendFunc(BlendFuncMode.Add, BlendFuncFactor.SrcAlpha, BlendFuncFactor.OneMinusSrcAlpha));
+			Globals.textureManager.SetActiveTexture(0,1);
+			Globals.textureManager.SetActiveTexture(1,2);
+			Globals.textureManager.SetActiveTexture(2,3);
+			Globals.textureManager.SetActiveTexture(3,4);
+			Globals.textureManager.SetActiveTexture(4,5);
+			Globals.textureManager.SetActiveTexture(5,6);
+			
+			float distance = 2.0f;
+			int counter = 0;
+			Thing tmpThing = new Thing(wfo);
+			for(float x = -1.764706f; x < 1.764706f; x+=1.0f){
+				for(float y = -2f; y < 2f;y+=1f){
+					tmpThing = new Thing(wfo);
+					tmpThing.scalexyzrot[0] = 1.0f;
+					tmpThing.scalexyzrot[1] = x;
+					tmpThing.scalexyzrot[2] = y;
+					tmpThing.scalexyzrot[3] = distance;
+					tmpThing.textureNumber = counter % 6;
+					Globals.thingManager.AddThing(tmpThing);
+					counter++;
+				}
+			}
+			
 		}
  
 		public void Update(){
@@ -70,63 +97,58 @@ namespace Railtype_PSM_Engine{
 				}
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Triangle)){
-				for(int i = 0; i < 182; i++){
+				for(int i = 0; i < 100; i++){
 					Globals.thingManager.AddThing(new Thing(wfo));
 				}
 			}			
-			if (gpd.ButtonsDown.HasFlag(GamePadButtons.L)){
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.L)){
 				for(int i = 0; i < 10; i++){
 					//Globals.thingManager.RemoveThing(Globals.thingManager.GetFirstThing());
 				}
 			}
-			if (gpd.ButtonsDown.HasFlag(GamePadButtons.R)){
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.R)){
 				int count = Globals.thingManager.ThingCount();
 				for(int i = 0; i < count; i++){
 					//Globals.thingManager.RemoveThing(Globals.thingManager.GetFirstThing());
 				}
 			}
 			
-			if (gpd.ButtonsDown.HasFlag(GamePadButtons.Start))
+			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Start))
 				Environment.Exit(0);
 			Globals.thingManager.Update();
-			
-			tmpThing = Globals.thingManager.GetFirstThing();
-			
-			if (tmpThing is ThingStatic){
+			/*if(tmpThing is ThingStatic){
 				switch(gpd.ButtonsDown){
 					case GamePadButtons.Left:	
-						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(-0.1f,0.0f,0.0f,0.0f));		
+						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(-0.1f, 0.0f, 0.0f, 0.0f));		
 						break;
-						case GamePadButtons.Right:	
-						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.1f,0.0f,0.0f,0.0f));
+					case GamePadButtons.Right:	
+						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.1f, 0.0f, 0.0f, 0.0f));
 						break;
-						case GamePadButtons.Up:	
+					case GamePadButtons.Up:	
 						tmpThing.scalexyzrot[2] += 0.1f;		
 						break;
-						case GamePadButtons.Down:	
+					case GamePadButtons.Down:	
 						tmpThing.scalexyzrot[2] -= 0.1f;		
 						break;
-						case GamePadButtons.L:	
+					case GamePadButtons.L:	
 						Globals.cameraToWorld *= Matrix4.RotationY(0.05f);
 						break;
-						case GamePadButtons.R:	
+					case GamePadButtons.R:	
 						Globals.cameraToWorld *= Matrix4.RotationY(-0.05f);
 						break;
 				}
 				tmpThing.scalexyzrot[5] += FMath.Radians(gpd.AnalogLeftX);
 				tmpThing.scalexyzrot[4] -= FMath.Radians(gpd.AnalogLeftY);
-			}	
+			}	*/
 			
 			
 		}
 
 		public void Render(){
 			graphics.SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			graphics.SetClearDepth(1.0f);
-			graphics.Clear();
-							
+			//graphics.SetClearDepth
+			graphics.Clear();			
 			counter++;
-			
 			Globals.thingManager.Draw();
 			graphics.SwapBuffers();
 

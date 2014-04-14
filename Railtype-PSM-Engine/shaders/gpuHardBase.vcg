@@ -26,10 +26,11 @@ void main( float4 in a_Position  : POSITION,
 		   float4 out v_Position : POSITION,
 		   float in matrixNumber : BLENDWEIGHT,
 		   float2 in uv : TEXCOORD0,
-		   float2 out _uv : TEXCOORD2,
-		   float out _threshhold : TEXCOORD1,
+		   float2 out _uv : TEXCOORD1,
+		   int out textureNum : TEXCOORD2,
 		   uniform float4x4 WorldViewProj,
-		   uniform float4x4 modelToWorld[30]
+		   uniform float4x4 modelToWorld[30],
+		   uniform int textureNumber
 		   )
 {
 	_uv = uv;
@@ -58,7 +59,7 @@ void main( float4 in a_Position  : POSITION,
 		tmpModelToWorld = mul(tmpModelToWorld ,tmpMatrix);
 		tmpModelToWorld = transpose(tmpModelToWorld);
 	}
- 	
+ 	textureNum = textureNumber;
 	tmpMatrix = mul( WorldViewProj, tmpModelToWorld);
 	v_Position = mul( tmpMatrix, a_Position );
 }

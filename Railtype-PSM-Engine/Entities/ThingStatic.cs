@@ -8,7 +8,8 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public override void Update(){
 			scalexyzrot[3] = 2.0f;
-			UpdateModelToWorld(false);
+			scalexyzrot[5] = 1f;
+			//UpdateModelToWorld(false);
 		}
 	}
 }
