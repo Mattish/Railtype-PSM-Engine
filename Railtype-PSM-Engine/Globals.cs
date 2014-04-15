@@ -8,7 +8,7 @@ using Railtype_PSM_Engine.Entities;
 namespace Railtype_PSM_Engine{
 	public static class Globals{
 		
-		public static int AmountPerPush = 30;
+		public static int AmountPerPush = 1;
 		public static int frameCount;
 		public static ShaderProgram gpuHard;
         public static Matrix4 cameraToWorld;

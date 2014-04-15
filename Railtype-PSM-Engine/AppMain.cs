@@ -26,13 +26,38 @@ namespace Railtype_PSM_Engine{
 				appmain.Render();
 			}
 		}
- 
+		
+	    private static Texture2D createTexture(string text, Font font, uint argb){
+	        int width = 400;
+	        int height = 400;
+	
+	        var image = new Image(ImageMode.Rgba,
+	                              new ImageSize(width, height),
+	                              new ImageColor(0, 0, 0, 0));
+	
+	        image.DrawText(text,
+	                       new ImageColor((int)((argb >> 16) & 0xff),
+	                                      (int)((argb >> 8) & 0xff),
+	                                      (int)((argb >> 0) & 0xff),
+	                                      (int)((argb >> 24) & 0xff)),
+	                       font, new ImagePosition(0, 0));
+	
+	        var texture = new Texture2D(width, height, false, PixelFormat.Rgba);
+	        texture.SetPixels(0, image.ToBuffer());
+	        image.Dispose();
+	
+	        return texture;
+	    }
+		
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
 			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/objects/square.obj");
 			tm = new ThingManager(graphics);			
-			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHardBase.cgx");		
+			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHardBase.cgx");	
+			Font font = new Font(FontAlias.System,18,FontStyle.Regular);
+			Texture2D tmpFontTexture = createTexture("1234567890abcdefghijABCDEFGHIJ",font,0xff0000ff);
+			Globals.textureManager.TryAddTexture(tmpFontTexture);
 			Globals.textureManager.TryAddTexture("railgun.png");
 			Globals.textureManager.TryAddTexture("marisa.png");
 			Globals.textureManager.TryAddTexture("uiharu.png");
@@ -43,13 +68,12 @@ namespace Railtype_PSM_Engine{
 			//GPUHard
 			Globals.gpuHard.SetAttributeBinding(0, "a_Position");			
 			Globals.gpuHard.SetAttributeBinding(1, "uv");
-			Globals.gpuHard.SetAttributeBinding(2, "matrixNumber");
 			int k = Globals.gpuHard.FindUniform("WorldViewProj");
 			Globals.gpuHard.SetUniformBinding(k, "WorldViewProj");			
 			k = Globals.gpuHard.FindUniform("modelToWorld");
 			Globals.gpuHard.SetUniformBinding(k, "modelToWorld");
-			k = Globals.gpuHard.FindUniform("modelToWorld");
-			Globals.gpuHard.SetUniformBinding(k, "modelToWorld");
+			k = Globals.gpuHard.FindUniform("textureNumber");
+			Globals.gpuHard.SetUniformBinding(k, "textureNumber");
 			
 			sw = new Stopwatch();
 			sw.Start();
@@ -64,11 +88,11 @@ namespace Railtype_PSM_Engine{
 			Globals.textureManager.SetActiveTexture(4,5);
 			Globals.textureManager.SetActiveTexture(5,6);
 			
-			float distance = 2.0f;
+			float distance = 10.0f;
 			int counter = 0;
 			Thing tmpThing = new Thing(wfo);
-			for(float x = -1.764706f; x < 1.764706f; x+=1.0f){
-				for(float y = -2f; y < 2f;y+=1f){
+			for(float x = -5f; x < 5f; x+=1.0f){
+				for(float y = -5f; y < 5f;y+=1f){
 					tmpThing = new Thing(wfo);
 					tmpThing.scalexyzrot[0] = 1.0f;
 					tmpThing.scalexyzrot[1] = x;
@@ -116,7 +140,6 @@ namespace Railtype_PSM_Engine{
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Start))
 				Environment.Exit(0);
 			Globals.thingManager.Update();
-			/*if(tmpThing is ThingStatic){
 				switch(gpd.ButtonsDown){
 					case GamePadButtons.Left:	
 						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(-0.1f, 0.0f, 0.0f, 0.0f));		
@@ -125,10 +148,10 @@ namespace Railtype_PSM_Engine{
 						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.1f, 0.0f, 0.0f, 0.0f));
 						break;
 					case GamePadButtons.Up:	
-						tmpThing.scalexyzrot[2] += 0.1f;		
+						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, 0.5f, 0.0f));		
 						break;
 					case GamePadButtons.Down:	
-						tmpThing.scalexyzrot[2] -= 0.1f;		
+						Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, -0.5f, 0.0f));		
 						break;
 					case GamePadButtons.L:	
 						Globals.cameraToWorld *= Matrix4.RotationY(0.05f);
@@ -137,9 +160,6 @@ namespace Railtype_PSM_Engine{
 						Globals.cameraToWorld *= Matrix4.RotationY(-0.05f);
 						break;
 				}
-				tmpThing.scalexyzrot[5] += FMath.Radians(gpd.AnalogLeftX);
-				tmpThing.scalexyzrot[4] -= FMath.Radians(gpd.AnalogLeftY);
-			}	*/
 			
 			
 		}

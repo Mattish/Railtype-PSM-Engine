@@ -21,6 +21,12 @@ namespace Railtype_PSM_Engine{
 			counter = 0;
 		}
 		
+		public int TryAddTexture(Texture2D texture){
+			_texturesByNumber.Add(counter,texture);
+			textureToBufferList.Add(7);
+			return counter++;
+		}
+		
 		public int TryAddTexture(string filename){
 			Texture2D tmpTexture = new Texture2D("/Application/images/" + filename,false,PixelFormat.Rgba);
 			_texturesByNumber.Add(counter,tmpTexture);

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Railtype_PSM_Engine.Entities{
 	public class ThingManager{
-		float[] vertex, matrixNumber, uv;
+		float[] vertex, uv;
 		ushort[] indices;
 		GraphicsContext gc;
 		int fragmentedFloats, fpsCounter;
@@ -34,7 +34,6 @@ namespace Railtype_PSM_Engine.Entities{
 			lastVerticiesIndex = lastIndiciesIndex = 0;
 			vertex = new float[(ushort.MaxValue * 3)];
 			uv = new float[(ushort.MaxValue * 2)];
-			matrixNumber = new float[ushort.MaxValue];
 			indices = new ushort[ushort.MaxValue];
 			matricesForShader = new Matrix4[8][];
 			
@@ -61,6 +60,7 @@ namespace Railtype_PSM_Engine.Entities{
 		}
 		
 		public bool RemoveThing(Thing input){
+			
 			int index = things.IndexOf(input);
 			if(index != -1){ // Found it
 				disposed.Add(things[index]);
@@ -192,8 +192,7 @@ namespace Railtype_PSM_Engine.Entities{
 					prims[textureBufferNo] = new Primitive[thingtextureBufferCounts[textureBufferNo]];
 					matricesForShader[textureBufferNo] = new Matrix4[thingtextureBufferCounts[textureBufferNo]];
 				}
-			}
-			
+			}			
 			thingtextureBufferCounts = new int[8];
 			for(int i = 0; i < things.Count; i++){
 				int tmpBufferNumber = Globals.textureManager.textureToBufferList[things[i].textureNumber];
@@ -201,15 +200,8 @@ namespace Railtype_PSM_Engine.Entities{
 				
 				//Matrix Array
 				matricesForShader[tmpBufferNumber][thingtextureBufferCounts[tmpBufferNumber]] = things[i].modelToWorld;
-				
-				if(matrixNumber.Length < vertex.Length / 3)
-					matrixNumber = new float[vertex.Length / 3];	
-				
-				float[] number = new float[]{(thingtextureBufferCounts[tmpBufferNumber] % Globals.AmountPerPush)};
-				ArrayFillComplex(ref matrixNumber, things[i].vertexIndex, ref number, things[i].vertexCount);	
 				thingtextureBufferCounts[tmpBufferNumber]++;
 			}
-			Globals.modelVertexBuffer.SetVertices(2, matrixNumber, 0, 0, matrixNumber.Length);
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
 		
