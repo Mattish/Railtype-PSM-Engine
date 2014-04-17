@@ -152,8 +152,8 @@ namespace Railtype_PSM_Engine.Util{
 				indices = _indices.ToArray();
 				_vertex.Clear();
 				_indices.Clear();
-			sw.Stop();
-			Console.WriteLine("finalizing took:" + sw.ElapsedMilliseconds);
+				sw.Stop();
+				Console.WriteLine("finalizing took:" + sw.ElapsedMilliseconds);
 			}
 		}
 }

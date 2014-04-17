@@ -25,6 +25,18 @@ namespace Railtype_PSM_Engine.Entities{
 			vertexIndex = 0;
 		}
 		
+		public Thing(ref float[] verticies, ref float[] uvs, ref ushort[] _indicies) : this(){
+			modelVertex = new float[verticies.Length];
+			Array.Copy(verticies,modelVertex,modelVertex.Length);
+			uv = new float[uvs.Length];
+			Array.Copy(uvs,uv,uv.Length);
+			indicies = new ushort[_indicies.Length];
+			Array.Copy(_indicies,indicies,indicies.Length);
+			prim.Count = (ushort)indicies.Length;
+			prim.Mode = DrawMode.Triangles;
+			vertexCount = (ushort)(modelVertex.Length/3);
+		}
+		
 		public Thing(Railtype_PSM_Engine.Util.WaveFrontObject wfo) : this(){
 			modelVertex = new float[wfo.models[0].pos.Length];
 			Array.Copy(wfo.models[0].pos,modelVertex,modelVertex.Length);

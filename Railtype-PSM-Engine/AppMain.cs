@@ -13,6 +13,7 @@ namespace Railtype_PSM_Engine{
 		private GraphicsContext graphics;
 		public int counter, fpsCounter;
 		public Texture2D texture;
+		CharMetrics[] charMetricsResult;
 		Railtype_PSM_Engine.Util.WaveFrontObject wfo;
 		Stopwatch sw;
 		ThingManager tm;
@@ -27,44 +28,23 @@ namespace Railtype_PSM_Engine{
 			}
 		}
 		
-	    private static Texture2D createTexture(string text, Font font, uint argb){
-	        int width = 400;
-	        int height = 400;
-	
-	        var image = new Image(ImageMode.Rgba,
-	                              new ImageSize(width, height),
-	                              new ImageColor(0, 0, 0, 0));
-	
-	        image.DrawText(text,
-	                       new ImageColor((int)((argb >> 16) & 0xff),
-	                                      (int)((argb >> 8) & 0xff),
-	                                      (int)((argb >> 0) & 0xff),
-	                                      (int)((argb >> 24) & 0xff)),
-	                       font, new ImagePosition(0, 0));
-	
-	        var texture = new Texture2D(width, height, false, PixelFormat.Rgba);
-	        texture.SetPixels(0, image.ToBuffer());
-	        image.Dispose();
-	
-	        return texture;
-	    }
-		
 		public void Initialize(){
 			graphics = new GraphicsContext();
 			Globals.Setup(graphics);
+			FontManager fm = new FontManager();
 			wfo = new Railtype_PSM_Engine.Util.WaveFrontObject("/Application/objects/square.obj");
 			tm = new ThingManager(graphics);			
 			Globals.gpuHard = new ShaderProgram("/Application/shaders/gpuHardBase.cgx");	
 			Font font = new Font(FontAlias.System,18,FontStyle.Regular);
-			Texture2D tmpFontTexture = createTexture("1234567890abcdefghijABCDEFGHIJ",font,0xff0000ff);
-			Globals.textureManager.TryAddTexture(tmpFontTexture);
+			//Texture2D tmpFontTexture = createTexture("1234567890abcdefghijABCDEFGHIJ",font,0xff0000ff);
+			Globals.textureManager.TryAddTexture(fm._fontTexture);
 			Globals.textureManager.TryAddTexture("railgun.png");
 			Globals.textureManager.TryAddTexture("marisa.png");
 			Globals.textureManager.TryAddTexture("uiharu.png");
 			Globals.textureManager.TryAddTexture("squareborder.png");
 			Globals.textureManager.TryAddTexture("skybox.png");
 			Globals.textureManager.TryAddTexture("test.png");
-			
+			charMetricsResult = font.GetTextMetrics("1234567890abcdefghijABCDEFGHIJ");
 			//GPUHard
 			Globals.gpuHard.SetAttributeBinding(0, "a_Position");			
 			Globals.gpuHard.SetAttributeBinding(1, "uv");
@@ -88,7 +68,7 @@ namespace Railtype_PSM_Engine{
 			Globals.textureManager.SetActiveTexture(4,5);
 			Globals.textureManager.SetActiveTexture(5,6);
 			
-			float distance = 10.0f;
+			float distance = 5.0f;
 			int counter = 0;
 			Thing tmpThing = new Thing(wfo);
 			for(float x = -5f; x < 5f; x+=1.0f){
@@ -103,7 +83,9 @@ namespace Railtype_PSM_Engine{
 					counter++;
 				}
 			}
-			
+			tmpThing = fm.NewThingText("");
+			tmpThing.scalexyzrot[3]-=0.01f;
+			Globals.thingManager.AddThing(tmpThing);
 		}
  
 		public void Update(){

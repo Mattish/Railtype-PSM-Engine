@@ -13,11 +13,8 @@ namespace Railtype_PSM_Engine.Entities{
 		GraphicsContext gc;
 		int fragmentedFloats, fpsCounter;
 		List<Thing> disposed, things, toAdd;
-		Matrix4[][] matricesForShader;
 		Matrix4 cameraToProjection;
-		Primitive[][] prims;
 		Stopwatch sw;
-		
 		int vertexBufferLowIndex, vertexBufferHighIndex, vertexCountDiff, lastVertexIndex, lastVerticiesIndex;
 		int indexBufferLowIndex, indexBufferHighIndex, indexCountDiff, lastIndexIndex, lastIndiciesIndex;
 					
@@ -28,19 +25,17 @@ namespace Railtype_PSM_Engine.Entities{
 			fpsCounter = 0;
 			//cameraToProjection = Matrix4.Perspective(FMath.Radians(1.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 			cameraToProjection = Matrix4.Identity;
-			cameraToProjection *= Matrix4.Ortho(-gc.Screen.AspectRatio,gc.Screen.AspectRatio,
-			                                   -1.0f,1.0f,1.0f,1000.0f);
+			cameraToProjection *= Matrix4.Ortho(-gc.Screen.AspectRatio, gc.Screen.AspectRatio,
+			                                   -1.0f, 1.0f, 1.0f, 1000.0f);
 			lastVertexIndex = lastIndexIndex = -1;
 			lastVerticiesIndex = lastIndiciesIndex = 0;
 			vertex = new float[(ushort.MaxValue * 3)];
 			uv = new float[(ushort.MaxValue * 2)];
 			indices = new ushort[ushort.MaxValue];
-			matricesForShader = new Matrix4[8][];
 			
 			disposed = new List<Thing>();
 			things = new List<Thing>();
 			toAdd = new List<Thing>();
-			prims = new Primitive[8][];
 			sw.Start();
 		}
 		
@@ -180,28 +175,7 @@ namespace Railtype_PSM_Engine.Entities{
 				Globals.modelVertexBuffer.SetVertices(1, uv, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
 				Globals.modelVertexBuffer.SetIndices(indices, indexBufferLowIndex, indexBufferLowIndex, indexBufferHighIndex - indexBufferLowIndex);
 			}
-			
-			int[] thingtextureBufferCounts = new int[8];
-			for(int i = 0; i < things.Count; i++){
-				int bufferNumber = Globals.textureManager.textureToBufferList[things[i].textureNumber];
-				thingtextureBufferCounts[bufferNumber]++;
-			}
-			
-			for(int textureBufferNo = 0; textureBufferNo < 8; textureBufferNo++){
-				if (thingtextureBufferCounts[textureBufferNo] > 0){
-					prims[textureBufferNo] = new Primitive[thingtextureBufferCounts[textureBufferNo]];
-					matricesForShader[textureBufferNo] = new Matrix4[thingtextureBufferCounts[textureBufferNo]];
-				}
-			}			
-			thingtextureBufferCounts = new int[8];
-			for(int i = 0; i < things.Count; i++){
-				int tmpBufferNumber = Globals.textureManager.textureToBufferList[things[i].textureNumber];
-				prims[tmpBufferNumber][thingtextureBufferCounts[tmpBufferNumber]] = things[i].prim;
-				
-				//Matrix Array
-				matricesForShader[tmpBufferNumber][thingtextureBufferCounts[tmpBufferNumber]] = things[i].modelToWorld;
-				thingtextureBufferCounts[tmpBufferNumber]++;
-			}
+					
 			gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
 		}
 		
@@ -211,7 +185,7 @@ namespace Railtype_PSM_Engine.Entities{
 			sww.Start();
 			CheckNewThings();
 			sww.Stop();
-			if(sw.ElapsedMilliseconds > 1000)
+			if(Globals.DEBUG_MODE && Globals.frameCount % 60 == 0)
 				Console.WriteLine("CheckNewThings():" + sww.ElapsedMilliseconds + "ms");
 			sww.Reset();
 			sww.Start();
@@ -221,14 +195,14 @@ namespace Railtype_PSM_Engine.Entities{
 			}
 			sww.Stop();
 			
-			if(sw.ElapsedMilliseconds > 1000)
+			if(Globals.DEBUG_MODE && Globals.frameCount % 60 == 0)
 				Console.WriteLine("foreach update:" + sww.ElapsedMilliseconds + "ms");
 			sww.Reset();
 			sww.Start();			
 			CheckVertexBuffer();		
 			sww.Stop();
 			
-			if(sw.ElapsedMilliseconds > 1000)
+			if(Globals.DEBUG_MODE && Globals.frameCount % 60 == 0)
 				Console.WriteLine("CheckVertexBuffer():" + sww.ElapsedMilliseconds + "ms");
 		}
 		
@@ -239,26 +213,21 @@ namespace Railtype_PSM_Engine.Entities{
 			gc.SetShaderProgram(Globals.gpuHard);
 			int k = Globals.gpuHard.FindUniform("WorldViewProj");
 			Globals.gpuHard.SetUniformValue(k, ref VP);
-			for(int bufferNumber = 0; bufferNumber < 8; bufferNumber++){
+			Primitive[] tempPrim = new Primitive[1];
+			foreach(Thing thing in things){
 				k = Globals.gpuHard.FindUniform("textureNumber");
-				Globals.gpuHard.SetUniformValue(k, bufferNumber);
-				if (prims[bufferNumber] != null){
-					int primCounter = 0, HowManyToPush = 0;
-					while(primCounter < prims[bufferNumber].Length){
-						HowManyToPush = prims[bufferNumber].Length - primCounter > Globals.AmountPerPush ? Globals.AmountPerPush : prims[bufferNumber].Length - primCounter;
-						setUniformWatch.Start();
-						k = Globals.gpuHard.FindUniform("modelToWorld");
-						Globals.gpuHard.SetUniformValue(k, matricesForShader[bufferNumber], 0, primCounter, HowManyToPush);
-						setUniformWatch.Stop();
-						sww.Start();
-						gc.DrawArrays(prims[bufferNumber], primCounter,HowManyToPush);
-						sww.Stop();
-						primCounter += HowManyToPush;
-					}
-				}
+				Globals.gpuHard.SetUniformValue(k, Globals.textureManager.textureToBufferList[thing.textureNumber]);
+				setUniformWatch.Start();
+				k = Globals.gpuHard.FindUniform("modelToWorld");
+				Globals.gpuHard.SetUniformValue(k, ref thing.modelToWorld);
+				setUniformWatch.Stop();
+				sww.Start();
+				tempPrim[0] = thing.prim;
+				gc.DrawArrays(tempPrim, 0, 1);
+				sww.Stop();
 			}
 			
-			if(sw.ElapsedMilliseconds > 1000){
+			if(Globals.DEBUG_MODE && sw.ElapsedMilliseconds > 1000){
 				Console.WriteLine("Draw:" + sww.ElapsedMilliseconds + "ms");
 				Console.WriteLine("settingUniform:" + setUniformWatch.ElapsedMilliseconds + "ms");
 				Console.WriteLine("Amount of Things:" + ThingCount() + " - fps:" + fpsCounter + " Memory usage: " + (GC.GetTotalMemory(true) / 1024) + "KB");

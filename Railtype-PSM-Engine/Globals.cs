@@ -10,6 +10,7 @@ namespace Railtype_PSM_Engine{
 		
 		public static int AmountPerPush = 1;
 		public static int frameCount;
+		public static bool DEBUG_MODE = true;
 		public static ShaderProgram gpuHard;
         public static Matrix4 cameraToWorld;
 		public static ThingManager thingManager;

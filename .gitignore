@@ -2,6 +2,7 @@
 bin
 obj
 images
+fonts
 *.user
 *.suo
 *.vsp
