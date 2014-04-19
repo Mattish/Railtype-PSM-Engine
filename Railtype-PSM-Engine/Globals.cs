@@ -15,16 +15,20 @@ namespace Railtype_PSM_Engine{
         public static Matrix4 cameraToWorld;
 		public static ThingManager thingManager;
 		public static TextureManager textureManager;
+		public static ModelManager modelManager;
+		public static FontManager fontManager;
 		public static int vertexSize;
 		public static VertexBuffer modelVertexBuffer;
-		static private GraphicsContext _graphic;
+		public static GraphicsContext gc;
 		public static Matrix4 ViewProjection;
 		public static Random random;
 		static public void Setup(GraphicsContext graphic){
 			frameCount = 0;
-			_graphic = graphic;
-			thingManager = new ThingManager(graphic);
-			textureManager = new TextureManager(graphic);
+			gc = graphic;
+			thingManager = new ThingManager();
+			textureManager = new TextureManager();
+			fontManager = new FontManager();
+			modelManager = new ModelManager();
 			random = new Random();
  			cameraToWorld = Matrix4.Identity;
 			cameraToWorld *= Matrix4.RotationY((float)Math.PI);

@@ -3,7 +3,7 @@ using Railtype_PSM_Engine.Util;
 
 namespace Railtype_PSM_Engine.Entities{
 	public class ThingStatic : Thing{
-		public ThingStatic(WaveFrontObject wfo) : base(wfo){
+		public ThingStatic(string name) : base(name){
 		}
 		
 		public override void Update(){

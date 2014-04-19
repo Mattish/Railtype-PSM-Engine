@@ -29,8 +29,10 @@ void main( float4 out Color : COLOR,
 		tmpColor = tex2D(Texture6, _uv);
 	else if(textureNum == 7)
 		tmpColor = tex2D(Texture7, _uv);
-	else
-		tmpColor = tex2D(Texture0, _uv);
-	
+	else{
+		Color = float4((_uv[0]+_uv[1])*0.5f,0.0f,0.0f,1.0f);
+		return;
+	}
 	Color = tmpColor;
+	
 }
