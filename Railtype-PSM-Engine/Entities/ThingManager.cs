@@ -32,6 +32,7 @@ namespace Railtype_PSM_Engine.Entities{
 		public bool AddThing(string name, Thing input){
 			if (!_thingMap.ContainsKey(name)){
 				_thingMap.Add(name,input);
+				Globals.modelManager.AddThing(input);
 				return true;
 			}
 			return false;
@@ -43,6 +44,7 @@ namespace Railtype_PSM_Engine.Entities{
 		
 		public bool RemoveThing(string name){
 			if (_thingMap.ContainsKey(name)){
+				Globals.modelManager.RemoveThing(_thingMap[name]);
 			}
 			return _thingMap.Remove(name);
 		}
@@ -79,12 +81,11 @@ namespace Railtype_PSM_Engine.Entities{
 					setUniformWatch.Start();					
 					k = Globals.gpuHard.FindUniform("textureNumber");
 					Globals.gpuHard.SetUniformValue(k, Globals.textureManager.GetBufferForTextureNumber(thing.Value.textureNumber));
-
 					k = Globals.gpuHard.FindUniform("modelToWorld");
 					Globals.gpuHard.SetUniformValue(k, ref thing.Value.modelToWorld);
 					setUniformWatch.Stop();
 					sww.Start();
-					tempPrim[0] = Globals.modelManager.GetModelPrimitiveByName(thing.Value.modelName);
+					tempPrim[0] = thing.Value.prim;
 					Globals.gc.DrawArrays(tempPrim, 0, 1);
 					sww.Stop();
 				}

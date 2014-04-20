@@ -13,6 +13,9 @@ namespace Railtype_PSM_Engine.Entities{
 		public float rand1,rand2;
 		public bool draw, disposable;
 		public string modelName;
+		public Primitive prim;
+		public int vertexCount;
+		public ushort vertexIndex;
 
 		public Thing(){
 			scalexyzrot = new float[7]{1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f};
@@ -20,10 +23,15 @@ namespace Railtype_PSM_Engine.Entities{
 			rand1 = (float)(Globals.random.NextDouble()*2)-1.0f;
 			rand2 = (float)(Globals.random.NextDouble()*2)-1.0f;
 			draw = true;
+			vertexCount = 0;
+			vertexIndex = 0;
 		}
 		
 		public Thing(string modelName_) : this(){
 			modelName = modelName_;
+			prim.Count = (ushort)Globals.modelManager.GetModel(modelName_).models[0].indices.Length;
+			prim.Mode = DrawMode.Triangles;
+			vertexCount = (ushort)(Globals.modelManager.GetModel(modelName_).models[0].verticies.Length / 3);
 		}
 		
 		public virtual void Update(){

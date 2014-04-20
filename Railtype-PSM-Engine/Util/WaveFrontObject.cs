@@ -23,9 +23,6 @@ namespace Railtype_PSM_Engine.Util{
 		public List<Model> models;
 		List<Vertex> vertexList;
 		Dictionary<string,ushort> vertexDict;
-		public Primitive prim;
-		public int vertexCount;
-		public ushort vertexIndex;
 		
 		public WaveFrontObject(){
 			pos = new List<Vector3>();
@@ -36,8 +33,6 @@ namespace Railtype_PSM_Engine.Util{
 			normal.Add(Vector3.One);
 			models = new List<Model>();
 			vertexList = new List<Vertex>();
-			vertexCount = 0;
-			vertexIndex = 0;
 		}
 		
 		public WaveFrontObject(string path){
@@ -49,9 +44,7 @@ namespace Railtype_PSM_Engine.Util{
 			uv.Add(Vector3.One);
 			normal.Add(Vector3.One);
 			models = new List<Model>();
-			vertexList = new List<Vertex>();
-			vertexCount = 0;
-			vertexIndex = 0;			
+			vertexList = new List<Vertex>();		
 			lines = new List<string>(File.ReadAllLines(path));
 			vertexDict = new Dictionary<string, ushort>(lines.Count / 2);
 			Model currentModel = new Model();
@@ -137,10 +130,6 @@ namespace Railtype_PSM_Engine.Util{
 			Console.WriteLine("Everything but finalize took:" + sw.ElapsedMilliseconds);
 			foreach(Model m in models)
 				m.finalize();
-			
-			prim.Count = (ushort)models[0].indices.Length;
-			prim.Mode = DrawMode.Triangles;
-			vertexCount = (ushort)(models[0].verticies.Length / 3);
 		}
 		
 		public WaveFrontObject(ref float[] verticiess, ref float[] uvss, float[] normalss, ref ushort[] indiciess){
@@ -152,8 +141,6 @@ namespace Railtype_PSM_Engine.Util{
 			normal.Add(Vector3.One);
 			models = new List<Model>();
 			vertexList = new List<Vertex>();
-			vertexCount = 0;
-			vertexIndex = 0;
 			Model tmpModel = new Model();
 			if(indiciess != null){
 				tmpModel.indices = new ushort[indiciess.Length];
@@ -171,10 +158,6 @@ namespace Railtype_PSM_Engine.Util{
 				tmpModel.normal = new float[normalss.Length];
 				Array.Copy(normalss, tmpModel.normal, normalss.Length);	
 			}
-			
-			prim.Count = (ushort)tmpModel.indices.Length;
-			prim.Mode = DrawMode.Triangles;
-			vertexCount = (ushort)(verticiess.Length / 3);
 			models.Add(tmpModel);
 		}
 		
@@ -194,8 +177,7 @@ namespace Railtype_PSM_Engine.Util{
 			int totalOutsideVerticies = 25;
 			models.Add(new Model());
 			models[0].verticies = new float[((totalOutsideVerticies) + 2) * 3];
-			vertexCount = (ushort)(models[0].verticies.Length / 3);
-			models[0].uv = new float[vertexCount * 2];
+			models[0].uv = new float[(models[0].verticies.Length / 3) * 2];
 			models[0].indices = new ushort[(totalOutsideVerticies) * 3];
 			models[0].verticies[0] = 0.0f;
 			models[0].verticies[1] = 0.0f;
@@ -239,9 +221,6 @@ namespace Railtype_PSM_Engine.Util{
 			}
 			models[0].indices[models[0].indices.Length - 1] = 1;
 			Console.WriteLine("make circle done");
-			prim.Count = (ushort)models[0].indices.Length;
-			prim.Mode = DrawMode.Triangles;
-			vertexCount = (ushort)(models[0].verticies.Length / 3);
 		}
 	}
 	

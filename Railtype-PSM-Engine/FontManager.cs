@@ -17,7 +17,6 @@ namespace Railtype_PSM_Engine{
 		Font _font;
 		char[] _chars;
 		CharMetrics[][] _charMetrics;
-		int counter = 0;
 		
 		public FontManager(){
 			_font = new Font(FontAlias.System,48,FontStyle.Regular);
@@ -42,7 +41,7 @@ namespace Railtype_PSM_Engine{
 			ushort[] indicies = new ushort[1];
 			createArraysForText(text, ref vert, ref uvs, ref indicies);
 			WaveFrontObject wfo = new WaveFrontObject(ref vert,ref uvs,new float[1]{0f},ref indicies);
-			Globals.modelManager.Add("text:" + text,wfo);
+			Globals.modelManager.AddModel("text:" + text,wfo);
 			Thing tmpThing = new Thing("text:" + text);
 			tmpThing.scalexyzrot[0] = 1.0f;
 			return tmpThing;
