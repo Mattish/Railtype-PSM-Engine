@@ -12,8 +12,10 @@ namespace Railtype_PSM_Engine.Entities{
 		Matrix4 cameraToProjection;
 		Stopwatch sw;
 		Dictionary<string,Thing> _thingMap;
+		float[] matrixNumbersArray;		
 					
 		public ThingManager(){
+			matrixNumbersArray = new float[ushort.MaxValue];
 			sw = new Stopwatch();
 			fpsCounter = 0;
 			//cameraToProjection = Matrix4.Perspective(FMath.Radians(1.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
@@ -71,29 +73,50 @@ namespace Railtype_PSM_Engine.Entities{
 		public void Draw(){
 			Stopwatch sww = new Stopwatch();
 			Stopwatch setUniformWatch = new Stopwatch();
+			Stopwatch matrixFillWatch = new Stopwatch();
 			Matrix4 VP = buildProjectionMatrix(); // Build camera to world projection			
 			Globals.gc.SetShaderProgram(Globals.gpuHard);
 			int k = Globals.gpuHard.FindUniform("WorldViewProj");
 			Globals.gpuHard.SetUniformValue(k, ref VP);
-			Primitive[] tempPrim = new Primitive[1];
+			
+			matrixFillWatch.Start();			
+			List<Primitive> tempPrim = new List<Primitive>(500);
+			List<Matrix4> tmpMatrixList = new List<Matrix4>(500);
+			int thingCounter = 0;
+			float[] inputArray = new float[1];
 			foreach(KeyValuePair<string,Thing> thing in _thingMap){
 				if (thing.Value.draw){
-					setUniformWatch.Start();					
-					k = Globals.gpuHard.FindUniform("textureNumber");
-					Globals.gpuHard.SetUniformValue(k, Globals.textureManager.GetBufferForTextureNumber(thing.Value.textureNumber));
-					k = Globals.gpuHard.FindUniform("modelToWorld");
-					Globals.gpuHard.SetUniformValue(k, ref thing.Value.modelToWorld);
-					setUniformWatch.Stop();
-					sww.Start();
-					tempPrim[0] = thing.Value.prim;
-					Globals.gc.DrawArrays(tempPrim, 0, 1);
-					sww.Stop();
+					tempPrim.Add(thing.Value.prim);
+					inputArray[0] = (float)(thingCounter % Globals.AmountPerPush);
+					ArrayFillComplex<float>(ref matrixNumbersArray,thing.Value.vertexIndex,ref inputArray,thing.Value.vertexCount);
+					tmpMatrixList.Add(thing.Value.modelToWorld);
+					thingCounter++;
 				}
+			}
+			matrixFillWatch.Stop();				
+			Globals.modelVertexBuffer.SetVertices(2,matrixNumbersArray,0,0,ushort.MaxValue);
+			Globals.gc.SetVertexBuffer(0, Globals.modelVertexBuffer);		
+			Primitive[] primArray = tempPrim.ToArray();
+			Matrix4[] matrixArray = tmpMatrixList.ToArray();
+				
+			
+			int primPosition = 0;
+			while(primPosition < thingCounter){
+				int amountToPush = primPosition + Globals.AmountPerPush > thingCounter ? thingCounter-primPosition : Globals.AmountPerPush;
+				setUniformWatch.Start();
+				k = Globals.gpuHard.FindUniform("modelToWorld");
+				Globals.gpuHard.SetUniformValue(k, matrixArray,0,primPosition,amountToPush);
+				setUniformWatch.Stop();
+				sww.Start();
+				Globals.gc.DrawArrays(primArray,primPosition,amountToPush);
+				sww.Stop();
+				primPosition += amountToPush;
 			}
 			
 			if(Globals.DEBUG_MODE && sw.ElapsedMilliseconds > 1000){
 				Console.WriteLine("Draw:" + sww.ElapsedMilliseconds + "ms");
 				Console.WriteLine("settingUniform:" + setUniformWatch.ElapsedMilliseconds + "ms");
+				Console.WriteLine("matrixFillWatch:" + matrixFillWatch.ElapsedMilliseconds + "ms");
 				Console.WriteLine("Amount of Things:" + ThingCount() + " - fps:" + fpsCounter + " Memory usage: " + (GC.GetTotalMemory(true) / 1024) + "KB");
 				fpsCounter = 0;
 				sw.Reset();

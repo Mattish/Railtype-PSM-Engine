@@ -53,6 +53,7 @@ namespace Railtype_PSM_Engine{
 			//GPUHard
 			Globals.gpuHard.SetAttributeBinding(0, "a_Position");			
 			Globals.gpuHard.SetAttributeBinding(1, "uv");
+			Globals.gpuHard.SetAttributeBinding(2, "matrixNumber");
 			int k = Globals.gpuHard.FindUniform("WorldViewProj");
 			Globals.gpuHard.SetUniformBinding(k, "WorldViewProj");			
 			k = Globals.gpuHard.FindUniform("modelToWorld");
@@ -73,23 +74,21 @@ namespace Railtype_PSM_Engine{
 			Globals.textureManager.SetActiveTexture(4, 4);
 			Globals.textureManager.SetActiveTexture(5, 5);
 		}
-		public void Update(){
-			Stopwatch sw = new Stopwatch();
-			sw.Start();			
+		public void Update(){		
 			GamePadData gpd = GamePad.GetData(0);
 			
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Left)){
 				//Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(-0.1f, 0.0f, 0.0f, 0.0f));
-				while(counter > 0)
+				while(counter >= 0)
 					Globals.thingManager.RemoveThing("" + counter--);
 			}
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Right)){
 				float distance = 5.0f;
 			
 				Thing tmpThing;
-				for(float x = -20f; x < 20f; x+=2.8645f){
-					for(float y = -20f; y < 20f; y+=2.8645f){
-						//tmpThing = Globals.fontManager.NewThingText("test:" + x + y);
+				//tmpThing = Globals.fontManager.NewThingText("test:" + x + y);
+				for(int x = -5; x < 5; x++){
+					for(int y = -5; y < 5; y++){
 						tmpThing = new Thing("square");
 						tmpThing.scalexyzrot[0] = 1.0f;
 						tmpThing.scalexyzrot[1] = x;
@@ -99,13 +98,13 @@ namespace Railtype_PSM_Engine{
 						Globals.thingManager.AddThing("" + counter, tmpThing);
 						counter++;
 					}
-				}	
+				}
 			}
 				//Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.1f, 0.0f, 0.0f, 0.0f));
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Up))
-				Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, 0.5f, 0.0f));		
+				Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, 0.25f, 0.0f));		
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.Down))
-				Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, -0.5f, 0.0f));	
+				Globals.cameraToWorld.RowW = Globals.cameraToWorld.RowW.Add(new Vector4(0.0f, 0.0f, -0.25f, 0.0f));	
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.L))
 				Globals.cameraToWorld *= Matrix4.RotationY(0.05f);
 			if(gpd.ButtonsDown.HasFlag(GamePadButtons.R))
@@ -115,26 +114,18 @@ namespace Railtype_PSM_Engine{
 				Environment.Exit(0);
 
 			Globals.thingManager.Update();
-			sw.Stop();
-			if (Globals.frameCount % 60 == 0)
-				Console.WriteLine("mainUpdateLoop:" + sw.ElapsedMilliseconds);
 		}
 
-		public void Render(){
-			Stopwatch sw = new Stopwatch();
-			sw.Start();	
+		public void Render(){	
 			graphics.SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			graphics.Clear();			
 			Globals.thingManager.Draw();
-			sw.Stop();
-			if (Globals.frameCount % 60 == 0)
-				Console.WriteLine("mainRenderLoop:" + sw.ElapsedMilliseconds);
-			sw.Reset();
-			sw.Start();
+			Stopwatch swww = new Stopwatch();
+			swww.Start();
 			graphics.SwapBuffers();
-			sw.Stop();
-			if (Globals.frameCount % 60 == 0)
-				Console.WriteLine("graphics.SwapBuffers():" + sw.ElapsedMilliseconds);
+			swww.Stop();
+			//Console.WriteLine("swapbuffers:" + swww.ElapsedMilliseconds +"ms");
+			
 		}
 		
 		

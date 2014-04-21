@@ -88,8 +88,7 @@ namespace Railtype_PSM_Engine{
 								
 								_modelMap[_toAdd[0].modelName].PutIndiciesIntoArray(ref indices, _disposed[i].prim.First);
 								for(int ii = 0; ii < _modelMap[_toAdd[0].modelName].models[0].indices.Length; ii++)
-									indices[_disposed[i].prim.First+i] += _toAdd[0].prim.Count;							
-								
+									indices[_disposed[i].prim.First+ii] += _toAdd[0].vertexIndex;							
 								
 								// Set BufferLowIndex to index of where _disposed Index is
 								vertexBufferLowIndex = _disposed[i].vertexIndex < vertexBufferLowIndex ? _disposed[i].vertexIndex : vertexBufferLowIndex;
@@ -134,7 +133,7 @@ namespace Railtype_PSM_Engine{
 						
 						_modelMap[_toAdd[0].modelName].PutIndiciesIntoArray(ref indices, _toAdd[0].prim.First);
 						for(int i = 0; i < _modelMap[_toAdd[0].modelName].models[0].indices.Length; i++)
-							indices[_toAdd[0].prim.First+i] += _toAdd[0].prim.Count;
+							indices[_toAdd[0].prim.First+i] += _toAdd[0].vertexIndex;
 						
 						vertexBufferLowIndex = _toAdd[0].vertexIndex < vertexBufferLowIndex ? _toAdd[0].vertexIndex : vertexBufferLowIndex;
 						indexBufferLowIndex = _toAdd[0].prim.First < indexBufferLowIndex ? _toAdd[0].prim.First : indexBufferLowIndex;
@@ -157,10 +156,10 @@ namespace Railtype_PSM_Engine{
 			int indexCount = indices.Length;
 			
 			if(Globals.modelVertexBuffer == null)
-				Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.UShort);
+				Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
 			else if(Globals.modelVertexBuffer.VertexCount < vertexCount){
 					Globals.modelVertexBuffer.Dispose();
-					Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.UShort);
+					Globals.modelVertexBuffer = new VertexBuffer(vertexCount, indexCount, VertexFormat.Float3, VertexFormat.Float2, VertexFormat.Float);
 				}
 			if(vertexBufferLowIndex != int.MaxValue){
 				Globals.modelVertexBuffer.SetVertices(0, vertex, vertexBufferLowIndex, vertexBufferLowIndex, vertexBufferHighIndex - vertexBufferLowIndex);
@@ -169,7 +168,7 @@ namespace Railtype_PSM_Engine{
 				
 			}
 					
-			Globals.gc.SetVertexBuffer(0, Globals.modelVertexBuffer);
+			
 		}
 		
 		

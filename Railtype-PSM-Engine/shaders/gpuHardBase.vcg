@@ -1,63 +1,17 @@
-float4x4 getRotXMatrix(float angle){
-	float4x4 result = {{1.0f,0.0f,0.0f,0.0f},
-			   	   	{0.0f,cos(angle),-(sin(angle)),0.0f},
-					{0.0f,sin(angle),cos(angle),0.0f},
-					{0.0f,0.0f,0.0f,1.0f}};
-	return result;
-}
-
-float4x4 getRotYMatrix(float angle){
-	float4x4 result = {{cos(angle),0.0f,(sin(angle)),0.0f},
-			   	   	{0.0f,1.0f,0.0f,0.0f},
-					{-sin(angle),0.0f,cos(angle),0.0f},
-					{0.0f,0.0f,0.0f,1.0f}};
-	return result;
-}
-
-float4x4 getRotZMatrix(float angle){
-	float4x4 result = {{cos(angle),-(sin(angle)),0.0f,0.0f},
-			   	   	{sin(angle),cos(angle),0.0f,0.0f},
-					{0.0f,0.0f,1.0f,0.0f},
-					{0.0f,0.0f,0.0f,1.0f}};
-	return result;
-}
-
 void main( float4 in a_Position  : POSITION,
 		   float4 out v_Position : POSITION,
 		   float2 in uv : TEXCOORD0,
 		   float2 out _uv : TEXCOORD1,
-		   int out textureNum : TEXCOORD2,
+		   float in matrixNumber : TEXCOORD2,
+		   int out textureNum : TEXCOORD4,
 		   uniform float4x4 WorldViewProj,
-		   uniform float4x4 modelToWorld,
+		   uniform float4x4 modelToWorld[30],
 		   uniform int textureNumber
 		   )
 {
 	_uv = uv;
-	float4x4 tmpMatrix = getRotYMatrix(modelToWorld[2][1]);
-	float4x4 tmpModelToWorld = modelToWorld;
-	if (modelToWorld[3][3] < 0.1f){ 
-		tmpModelToWorld = getRotXMatrix(modelToWorld[2][0]);
-	
-		tmpModelToWorld = mul(tmpModelToWorld,tmpMatrix);
-	
-		tmpMatrix = getRotZMatrix(modelToWorld[2][2]);
-		tmpModelToWorld = mul(tmpModelToWorld,tmpMatrix);
-	
-		tmpMatrix[0] = float4(modelToWorld[0][0],0,0,0);
-		tmpMatrix[1] = float4(0,modelToWorld[0][0],0,0);
-		tmpMatrix[2] = float4(0,0,modelToWorld[0][0],0);
-		tmpMatrix[3] = float4(0,0,0,1);
-		tmpModelToWorld= mul(tmpModelToWorld,tmpMatrix);
-	
-		tmpMatrix[0] = float4(1,0,0,0);
-		tmpMatrix[1] = float4(0,1,0,0);
-		tmpMatrix[2] = float4(0,0,1,0);
-		tmpMatrix[3] = float4(modelToWorld[1]);
-		tmpMatrix[3][3] = 1.0f;
-		tmpModelToWorld = mul(tmpModelToWorld ,tmpMatrix);
-		tmpModelToWorld = transpose(tmpModelToWorld);
-	}
+	int matrixPos = int(matrixNumber);
  	textureNum = textureNumber;
-	tmpMatrix = mul( WorldViewProj, tmpModelToWorld);
+	float4x4 tmpMatrix = mul( WorldViewProj, modelToWorld[matrixPos]);
 	v_Position = mul( tmpMatrix, a_Position );
 }

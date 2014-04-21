@@ -174,7 +174,7 @@ namespace Railtype_PSM_Engine.Util{
 		}
 		
 		public void MakeCircle(){
-			int totalOutsideVerticies = 25;
+			int totalOutsideVerticies = 32;
 			models.Add(new Model());
 			models[0].verticies = new float[((totalOutsideVerticies) + 2) * 3];
 			models[0].uv = new float[(models[0].verticies.Length / 3) * 2];
