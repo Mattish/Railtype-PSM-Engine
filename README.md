@@ -3,7 +3,7 @@ Railtype-PSM-Engine
 
 PSM 3D graphics engine aimed for Vita using the PSM SDK
 
-Can whack out a bunch of stuff while keeping 60fps. Hardware/VM limitations seems to be the major downfall. When many objects overlap, blending chugs the fps pretty hard.
+**Currently being re-written**
 
 stuff done:
 WaveFront obj loader
