@@ -5,7 +5,7 @@ using System.IO;
 using Sce.PlayStation.Core;
 using Sce.PlayStation.Core.Graphics;
 
-namespace Railtype_PSM_Engine.Util{
+namespace RailTypePSMEngineNew{
 	public struct Vertex : IEquatable<Vertex>{
 		public Vector3 pos, uv, normal;
 	
@@ -132,7 +132,7 @@ namespace Railtype_PSM_Engine.Util{
 				m.finalize();
 		}
 		
-		public WaveFrontObject(ref float[] verticiess, ref float[] uvss, float[] normalss, ref ushort[] indiciess){
+		public WaveFrontObject(ref float[] verticiess, ref UShort2N[] uvss, float[] normalss, ref ushort[] indiciess){
 			pos = new List<Vector3>();
 			uv = new List<Vector3>();
 			normal = new List<Vector3>();
@@ -151,7 +151,7 @@ namespace Railtype_PSM_Engine.Util{
 				Array.Copy(verticiess, tmpModel.verticies, verticiess.Length);
 			}
 			if(uvss != null){
-				tmpModel.uv = new float[uvss.Length];
+				tmpModel.uv = new UShort2N[uvss.Length];
 				Array.Copy(uvss, tmpModel.uv, uvss.Length);
 			}
 			if(normalss != null){
@@ -165,7 +165,7 @@ namespace Railtype_PSM_Engine.Util{
 			Array.Copy(models[0].verticies, 0, input, position, models[0].verticies.Length); 
 		}
 		
-		public void PutModelUVIntoArray(ref float[] input, int position){
+		public void PutModelUVIntoArray(ref UShort2N[] input, int position){
 			Array.Copy(models[0].uv, 0, input, position, models[0].uv.Length);	
 		}
 		
@@ -177,32 +177,33 @@ namespace Railtype_PSM_Engine.Util{
 			int totalOutsideVerticies = 32;
 			models.Add(new Model());
 			models[0].verticies = new float[((totalOutsideVerticies) + 2) * 3];
-			models[0].uv = new float[(models[0].verticies.Length / 3) * 2];
+			models[0].uv = new UShort2N[(models[0].verticies.Length / 3)];
 			models[0].indices = new ushort[(totalOutsideVerticies) * 3];
 			models[0].verticies[0] = 0.0f;
 			models[0].verticies[1] = 0.0f;
 			models[0].verticies[2] = 0.0f;
-			models[0].uv[0] = (models[0].verticies[0] + 1.0f) * 0.5f;
-			models[0].uv[1] = (models[0].verticies[1] + 1.0f) * 0.5f;
+			float tmpFloatOne = (models[0].verticies[0] + 1.0f) * 0.5f;
+			float tmpFloatTwo = (models[0].verticies[1] + 1.0f) * 0.5f;
+			models[0].uv[0] = new UShort2N(tmpFloatOne,tmpFloatTwo);
 			models[0].indices[0] = 0;
 			ushort currentIndicies = 2, previousIndicies = 1;
 			double rotation = 0.0f;
 			double x = Math.Cos(rotation);
 			double y = Math.Sin(rotation);
 			models[0].verticies[3] = (float)x;
-			models[0].uv[2] = (-models[0].verticies[3] + 1.0f) * 0.5f;
 			models[0].verticies[4] = (float)y;
-			models[0].uv[3] = (-models[0].verticies[4] + 1.0f) * 0.5f;
-			models[0].verticies[5] = 0.0f;
+			models[0].verticies[5] = 0.0f;			
+			tmpFloatOne = (-models[0].verticies[3] + 1.0f) * 0.5f;
+			tmpFloatTwo = (-models[0].verticies[4] + 1.0f) * 0.5f;
+			models[0].uv[1] = new UShort2N(tmpFloatOne,tmpFloatTwo);
 			models[0].indices[1] = previousIndicies;
 			rotation += (Math.PI * 2) / (double)totalOutsideVerticies;
 			x = Math.Cos(rotation);
 			y = Math.Sin(rotation);
 			models[0].verticies[6] = (float)x;//current
-			models[0].uv[4] = (-models[0].verticies[6] + 1.0f) * 0.5f;
 			models[0].verticies[7] = (float)y;
-			models[0].uv[5] = (-models[0].verticies[7] + 1.0f) * 0.5f;
 			models[0].verticies[8] = 0.0f;
+			models[0].uv[2] = new UShort2N((-models[0].verticies[6] + 1.0f) * 0.5f,(-models[0].verticies[7] + 1.0f) * 0.5f);
 			models[0].indices[2] = currentIndicies;
 			for(int i = 1; i < totalOutsideVerticies; i++){
 				previousIndicies++;
@@ -213,10 +214,10 @@ namespace Railtype_PSM_Engine.Util{
 				x = Math.Cos(rotation);
 				y = Math.Sin(rotation);
 				models[0].verticies[(i * 3) + 6] = (float)x; //current
-				models[0].uv[(currentIndicies * 2)] = (-models[0].verticies[(i * 3) + 6] + 1.0f) * 0.5f;
 				models[0].verticies[(i * 3) + 7] = (float)y;
-				models[0].uv[(currentIndicies * 2) + 1] = (-models[0].verticies[(i * 3) + 7] + 1.0f) * 0.5f;
-				models[0].verticies[(i * 3) + 8] = 0.0f;
+				models[0].verticies[(i * 3) + 8] = 0.0f;				
+				models[0].uv[currentIndicies] = new UShort2N((-models[0].verticies[(i * 3) + 6] + 1.0f) * 0.5f,
+				                                             (-models[0].verticies[(i * 3) + 7] + 1.0f) * 0.5f);
 				models[0].indices[(i * 3) + 2] = currentIndicies;
 			}
 			models[0].indices[models[0].indices.Length - 1] = 1;
@@ -227,7 +228,8 @@ namespace Railtype_PSM_Engine.Util{
 	public class Model{
 		public string name;
 		public List<Vertex> _vertex;
-		public float[] verticies, normal, uv;
+		public float[] verticies, normal;
+		public UShort2N[] uv;
 		public ushort[] indices;
 		public List<ushort> _indices;
 			
@@ -242,7 +244,7 @@ namespace Railtype_PSM_Engine.Util{
 			sw.Start();
 			verticies = new float[_vertex.Count * 3];
 			normal = new float[_vertex.Count * 3];
-			uv = new float[_vertex.Count * 2];
+			uv = new UShort2N[_vertex.Count];
 			for(int i = 0; i < _vertex.Count; i++){
 				verticies[(i * 3)] = _vertex[i].pos.X;
 				verticies[(i * 3) + 1] = _vertex[i].pos.Y;
@@ -250,8 +252,7 @@ namespace Railtype_PSM_Engine.Util{
 				normal[(i * 3)] = _vertex[i].normal.X;
 				normal[(i * 3) + 1] = _vertex[i].normal.Y;
 				normal[(i * 3) + 2] = _vertex[i].normal.Z;
-				uv[(i * 2)] = _vertex[i].uv.X;
-				uv[(i * 2) + 1] = _vertex[i].uv.Y;
+				uv[i] = new UShort2N(_vertex[i].uv.X,_vertex[i].uv.Y);
 			}
 			indices = _indices.ToArray();
 			_vertex.Clear();
