@@ -2,35 +2,38 @@ using System;
 using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core.Environment;
 using Sce.PlayStation.Core;
+using System.Diagnostics;
 
 namespace RailTypePSMEngineNew{
 	public class RailTypeEngine{
 		ThingHandler _th;
 		GraphicsContext _gc;
 		public static Matrix4 cameraToWorld;
+		int frameCount;
+		Stopwatch frameCounter;
 		
 		public RailTypeEngine(GraphicsContext gc){
 			_th = new ThingHandler();	
 			_gc = gc;
 			GraphicsHandler.Init(gc);
 			AssetHandler.Init();
+			frameCount = 0;
+			frameCounter = new Stopwatch();
+			
 			cameraToWorld = Matrix4.Identity;
-			WaveFrontObject wfo = new WaveFrontObject("/Application/objects/square.obj");
-			Thing tmpThing = new Thing(wfo.models[0]);
-			tmpThing.scalexyzrot[3] = 10.0f;
-			tmpThing.scalexyzrot[2] = 1.25f;
-			tmpThing.scalexyzrot[1] = 1.25f;
-			tmpThing.scalexyzrot[0] = 1.0f;
-			
-			
-			Thing tmpThingg = new Thing(wfo.models[0]);
-			tmpThingg.scalexyzrot[3] = 10.0f;
-			tmpThingg.scalexyzrot[2] = -1.25f;
-			tmpThingg.scalexyzrot[1] = -1.25f;
-			tmpThingg.scalexyzrot[0] = 1.0f;
-			
-			_th.AddThing(tmpThingg);
-			_th.AddThing(tmpThing);
+			WaveFrontObject wfo = new WaveFrontObject("/Application/objects/cube.obj");
+
+			float doublePI = (float)Math.PI*2;
+			float floatit = doublePI/35;
+			for(float j = 0.0f; j < doublePI;j+=floatit){
+				ThingRotating tmpThing = new ThingRotating(wfo.models[0]);
+				tmpThing.scalexyzrot[3] = 3.0f;
+				tmpThing.scalexyzrot[2] = (float)Math.Sin(j);
+				tmpThing.scalexyzrot[1] = (float)Math.Cos(j);
+				tmpThing.scalexyzrot[0] = 0.1f;
+				_th.AddThing(tmpThing);				
+			}
+			frameCounter.Start();
 		}
 		
 		public void Render(){
@@ -51,6 +54,13 @@ namespace RailTypePSMEngineNew{
 				GraphicsHandler.GetGHInstance().Draw(ref batchPrims, ref batchMatricies, ref batchThingNumbers, bi.index, bi.count);
 			}
 			_gc.SwapBuffers();
+			frameCount++;
+			if (frameCounter.ElapsedMilliseconds > 1000){	
+				System.Console.WriteLine("fps:{0:D}",frameCount);
+				frameCount = 0;
+				frameCounter.Reset();
+				frameCounter.Start();
+			}
 		}
 		
 		public void Update(){

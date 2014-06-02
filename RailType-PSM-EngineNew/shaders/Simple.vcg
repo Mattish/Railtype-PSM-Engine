@@ -18,7 +18,10 @@ void main( float3 in v_Position  : POSITION,
 		}
 		arrayPos++;
 	}
-	a_TexCoord = v_TexCoord;
+	//a_TexCoord = v_TexCoord;
+	a_TexCoord[0] = ModelMatricies[arrayPos][3][0];
+	a_TexCoord[1] = ModelMatricies[arrayPos][3][1];
+
 	a_Number = globalThingNo;
 	float4 pos = float4(v_Position,1.0f);
 	float4x4 projectionMatrix = mul(ModelMatricies[arrayPos], WorldViewProj);

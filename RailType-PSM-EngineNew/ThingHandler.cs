@@ -24,7 +24,12 @@ namespace RailTypePSMEngineNew{
 		
 		
 		public void TryGetBatchesOfThings(out BatchInfo[] bi, out Primitive[] prims, out Matrix4[] matricies, out int[] thingNumbers){
-			bi = new BatchInfo[_batchedMapPerUpdate.Count];
+			int amountOfBatches = 1;
+			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMapPerUpdate){
+				amountOfBatches += (int)Math.Ceiling((double)(entry.Value.Count/16));
+			}
+			
+			bi = new BatchInfo[amountOfBatches];
 			prims = new Primitive[_totalDrawableAmount];
 			matricies = new Matrix4[_totalDrawableAmount];
 			thingNumbers = new int[_totalDrawableAmount];
@@ -39,12 +44,17 @@ namespace RailTypePSMEngineNew{
 					thingNumbers[thingIndex+thingCounter] = thg.globalNumber;
 					thingCounter++;
 				}
-				bi[batchInfoIndex] = new BatchInfo(){shaderNumber = entry.Key.Item1,
-													textureNumber = entry.Key.Item2,
-													count = thingCounter,
-													index = thingIndex};
-				
-				batchInfoIndex++;
+				int AmountOfThings = 0;
+				int totalAmountOfThings = 0;
+				while(totalAmountOfThings < thingCounter){
+					AmountOfThings = (thingCounter-totalAmountOfThings) < 16 ? (thingCounter-totalAmountOfThings) : 16;
+					bi[batchInfoIndex] = new BatchInfo(){shaderNumber = entry.Key.Item1,
+														textureNumber = entry.Key.Item2,
+														count = AmountOfThings,
+														index = thingIndex+totalAmountOfThings};
+					totalAmountOfThings += AmountOfThings;
+					batchInfoIndex++;
+				}
 				thingIndex += thingCounter;
 			}
 		}
