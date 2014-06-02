@@ -15,3 +15,5 @@ Previous attempts at optimizations by pushing more work to the GPU proved unsucc
 ![](http://puu.sh/8cSZX.jpg)
 
 _several textures and some text_
+
+%[600,338,http://puu.sh/9bPYu/36db22c6a9.jpg,http://mattish.co.uk/github/output.mp4,http://mattish.co.uk/github/output.webm] 
