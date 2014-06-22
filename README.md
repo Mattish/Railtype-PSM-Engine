@@ -6,7 +6,7 @@ PSM 3D graphics engine aimed for Vita using the PSM SDK
 **>> Currently being re-written <<**
 
 
-![](http://tentaclenoises.co.uk/github/newexample.jpg 250x)
+![](http://tentaclenoises.co.uk/github/newexample.jpg)
 
 _coloured cubes spiraling to create a wonderful tunnel_
 
@@ -21,6 +21,6 @@ Previous attempts at optimizations by pushing more work to the GPU proved unsucc
 * Handling for too-many-to-handle texture counts just to make sure.
 * Entity handling to avoid fragmentation
 
-![](http://puu.sh/8cSZX.jpg 250x)
+![](http://puu.sh/8cSZX.jpg)
 
 _several textures and some text_
