@@ -127,7 +127,6 @@ namespace RailTypePSMEngineNew{
 				}
 			}
 			
-			Console.WriteLine("Everything but finalize took:" + sw.ElapsedMilliseconds);
 			foreach(Model m in models)
 				m.finalize();
 		}
@@ -173,8 +172,7 @@ namespace RailTypePSMEngineNew{
 			Array.Copy(models[0].indices, 0, input, position, models[0].indices.Length);	
 		}
 		
-		public void MakeCircle(){
-			int totalOutsideVerticies = 32;
+		public void MakeCircle(int totalOutsideVerticies){
 			models.Add(new Model());
 			models[0].verticies = new float[((totalOutsideVerticies) + 2) * 3];
 			models[0].uv = new UShort2N[(models[0].verticies.Length / 3)];
@@ -221,7 +219,6 @@ namespace RailTypePSMEngineNew{
 				models[0].indices[(i * 3) + 2] = currentIndicies;
 			}
 			models[0].indices[models[0].indices.Length - 1] = 1;
-			Console.WriteLine("make circle done");
 		}
 	}
 	
@@ -258,7 +255,6 @@ namespace RailTypePSMEngineNew{
 			_vertex.Clear();
 			_indices.Clear();
 			sw.Stop();
-			Console.WriteLine("finalizing took:" + sw.ElapsedMilliseconds);
 		}
 
 	}

@@ -25,5 +25,5 @@ void main( float3 in v_Position  : POSITION,
 	a_Number = globalThingNo;
 	float4 pos = float4(v_Position,1.0f);
 	float4x4 projectionMatrix = mul(ModelMatricies[arrayPos], WorldViewProj);
-    a_Position = mul( pos, projectionMatrix );
+    a_Position = mul(pos, projectionMatrix);
 }

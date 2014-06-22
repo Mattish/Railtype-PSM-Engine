@@ -23,6 +23,7 @@ namespace RailTypePSMEngineNew{
 				shaderTextureNo = new Tuple<int, int>(0,0);
 			
 			globalNumber = Thing.thingNumberCounter++;
+			ThingHandler.GetInstance().AddThing(this);	
 		}
 		
 		~Thing(){
@@ -36,6 +37,10 @@ namespace RailTypePSMEngineNew{
 		
 		public virtual void Update(){
 			UpdateModelToWorld();
+		}
+		
+		public void Destroy(){
+			disposable = true;
 		}
 		
 		Vector4 tmp;

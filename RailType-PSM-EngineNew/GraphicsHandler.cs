@@ -7,22 +7,18 @@ namespace RailTypePSMEngineNew{
 	public class GraphicsHandler{
 		private static GraphicsHandler _gh;
 		private GraphicsContext _gc;
-		private Dictionary<int,ModelLocationData> _indexToModelLocationData;
+		//private Dictionary<int,ModelLocationData> _indexToModelLocationData;
 		
 		private VertexBuffer _vb;
-		private int _indiciesCount, _verticiesCount;
 		private ushort _indiciesIndex, _verticiesIndex;	
+		//private int[] activeTextureBuffers;
 		
-		
-		Matrix4 modelToWorld, cameraToWorld;
+		public Matrix4 modelToWorld, cameraToWorld;
 		
 		private GraphicsHandler(GraphicsContext gc){
 			_gc = gc;
 			_vb = new VertexBuffer(8192, 8192, new VertexFormat[]{VertexFormat.Float3, VertexFormat.UShort2N, VertexFormat.Float});
-			_indiciesCount = _verticiesCount = 0;
 			_indiciesIndex = _verticiesIndex = 0;
-
-			
 			
 //			cameraToProjection = Matrix4.Perspective(FMath.Radians(45.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 //			cameraToProjection = Matrix4.Identity;
@@ -82,7 +78,7 @@ namespace RailTypePSMEngineNew{
 		public void Draw(Primitive[] primsToDraw){
 			_gc.SetVertexBuffer(0,_vb);
 			_gc.SetShaderProgram(AssetHandler.GetInstance().GetSPSimple());
-			Matrix4 VP = buildProjectionMatrix(modelToWorld,cameraToWorld);
+			Matrix4 VP = buildProjectionMatrix(cameraToWorld);
 			AssetHandler.GetInstance().GetSPSimple().SetUniformValue(0, ref VP);
 			_gc.DrawArrays(primsToDraw);	
 		}
@@ -90,15 +86,16 @@ namespace RailTypePSMEngineNew{
 		public void Draw(Primitive[] primsToDraw, int start, int count){
 			_gc.SetVertexBuffer(0,_vb);
 			_gc.SetShaderProgram(AssetHandler.GetInstance().GetSPSimple());
-			Matrix4 VP = buildProjectionMatrix(modelToWorld,cameraToWorld);
+			Matrix4 VP = buildProjectionMatrix(cameraToWorld);
 			AssetHandler.GetInstance().GetSPSimple().SetUniformValue(0, ref VP);
 			_gc.DrawArrays(primsToDraw,start,count);	
 		}
 		
-		public void Draw(ref Primitive[] primsToDraw, ref Matrix4[] batchMatricies, ref int[] batchThingNumbers, int start, int count){
+		public void Draw(Primitive[] primsToDraw, Matrix4[] batchMatricies, int[] batchThingNumbers, int start, int count,
+                 			int shaderNo, int textureNo){
 			_gc.SetVertexBuffer(0, _vb);
 			_gc.SetShaderProgram(AssetHandler.GetInstance().GetSPSimple());
-			Matrix4 VP = buildProjectionMatrix(modelToWorld,cameraToWorld);
+			Matrix4 VP = buildProjectionMatrix(cameraToWorld);
 			//WorldToProjection
 			AssetHandler.GetInstance().GetSPSimple().SetUniformValue(0, ref VP);
 			//ModelMatricies
@@ -108,19 +105,18 @@ namespace RailTypePSMEngineNew{
 			_gc.DrawArrays(primsToDraw, start, count);	
 		}
 		
-		private Matrix4 buildProjectionMatrix(Matrix4 modelToWorld, Matrix4 cameraToWorld, float n = 0.1f, float f = 1000.0f){
+		private Matrix4 buildProjectionMatrix(Matrix4 cameraToWorld, float n = 0.1f, float f = 1000.0f){
 			Matrix4 worldToCamera;
 			cameraToWorld.Inverse(out worldToCamera);
 			
 			Matrix4 cameraToProjection = Matrix4.Identity;
 //			cameraToProjection *= Matrix4.Ortho(-_gc.Screen.AspectRatio, _gc.Screen.AspectRatio, -1.0f, 1.0f, 0.1f, 100.0f);
-			
-			cameraToProjection *= Matrix4.Perspective(FMath.Radians(45.0f), _gc.Screen.AspectRatio, 1f, 1000.0f);
+			cameraToProjection *= Matrix4.Perspective(FMath.Radians(45.0f), _gc.Screen.AspectRatio, 0.1f, 1000.0f);
 			
 //		    cameraToProjection = Matrix4.Identity;
 //		    cameraToProjection *= Matrix4.Frustum(-n, n, -n, n, n, f);
 			
-			Matrix4 tmp = worldToCamera * cameraToProjection;
+			Matrix4 tmp = cameraToProjection * worldToCamera;
 			return tmp;
 		}
 		
@@ -137,12 +133,6 @@ namespace RailTypePSMEngineNew{
 			}
 		}
 		
-	}
-	
-	struct ModelLocationData{
-		public int index;
-		public int amountOfFloats;
-		public int amountOfVertex;
 	}
 }
 

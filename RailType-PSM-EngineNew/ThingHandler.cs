@@ -10,18 +10,24 @@ namespace RailTypePSMEngineNew{
 		private int _totalAmount;
 		private int _totalDrawableAmount;
 		
+		static private ThingHandler _th;
 		
 		// shaderNo, textureNo
 		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMap;
 		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMapPerUpdate;
 		
-		
-		public ThingHandler(){
+		private ThingHandler(){
 			_batchedMap = new Dictionary<Tuple<int, int>, List<Thing>>();
 			_batchedMapPerUpdate = new Dictionary<Tuple<int, int>, List<Thing>>();
-			_totalAmount = _totalDrawableAmount = 0;
+			_totalAmount = _totalDrawableAmount = 0;	
 		}
 		
+		public static ThingHandler GetInstance(){
+			if (_th == null){
+				_th = new ThingHandler();
+			}
+			return _th;
+		}
 		
 		public void TryGetBatchesOfThings(out BatchInfo[] bi, out Primitive[] prims, out Matrix4[] matricies, out int[] thingNumbers){
 			int amountOfBatches = 1;
@@ -75,14 +81,25 @@ namespace RailTypePSMEngineNew{
 			_totalDrawableAmount = 0;
 			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMap){
 				_batchedMapPerUpdate.Add(entry.Key,new List<Thing>(1));
-				foreach(Thing thg in entry.Value){
-					thg.Update();
-					if (thg.draw){
-						_batchedMapPerUpdate[thg.shaderTextureNo].Add(thg);
-						_totalDrawableAmount++;
+				for(int i = 0; i < entry.Value.Count; i++){
+					Thing someThing = entry.Value[i];
+					if (!someThing.disposable){ // update the alive Thing
+						someThing.Update();
+						if (someThing.draw){
+							_batchedMapPerUpdate[someThing.shaderTextureNo].Add(someThing);
+							_totalDrawableAmount++;
+						}
+					}
+					else{ // Remove the disposable Thing
+						entry.Value.RemoveAt(i);
+						i--;
 					}
 				}
 			}
+		}
+		
+		public int GetTotalDrawableAmount(){
+			return _totalDrawableAmount;	
 		}
 	}
 	
