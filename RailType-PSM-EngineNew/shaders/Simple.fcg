@@ -1,6 +1,0 @@
-void main( float4 out Color : COLOR,
-		   half2 in a_TexCoord : TEXCOORD0,
-		   float in a_Number : TEXCOORD1)
-{
-	Color = float4(a_TexCoord[0],a_TexCoord[1],0.4f,1.0f);
-}
