@@ -1,0 +1,29 @@
+
+void main( float3 in v_Position  : POSITION,
+		   float4 out a_Position : POSITION,
+		   half2 in v_TexCoord : TEXCOORD0,
+		   half2 out a_TexCoord : TEXCOORD0,
+		   float in v_Number : TEXCOORD1,
+		   int out a_Number : TEXCOORD1,
+		   uniform float4x4 WorldViewProj,
+		   uniform float4x4 ModelMatricies[16],
+		   uniform int ThingNumbers[16]
+		   )
+{
+	int arrayPos = 0;
+	int globalThingNo = int(v_Number);
+	while(arrayPos < 16){
+		if (ThingNumbers[arrayPos] == globalThingNo){
+			break;
+		}
+		arrayPos++;
+	}
+	//a_TexCoord = v_TexCoord;
+	a_TexCoord[0] = ModelMatricies[arrayPos][3][0];
+	a_TexCoord[1] = ModelMatricies[arrayPos][3][1];
+
+	a_Number = globalThingNo;
+	float4 pos = float4(v_Position,1.0f);
+	float4x4 projectionMatrix = mul(ModelMatricies[arrayPos], WorldViewProj);
+    a_Position = mul(pos, projectionMatrix);
+}
