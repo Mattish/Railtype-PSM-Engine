@@ -131,7 +131,7 @@ namespace RailTypePSMEngine.Asset{
 				m.finalize();
 		}
 		
-		public WaveFrontObject(ref float[] verticiess, ref UShort2N[] uvss, float[] normalss, ref ushort[] indiciess){
+		public WaveFrontObject(ref float[] verticess, ref UShort2N[] uvss, float[] normalss, ref ushort[] indiciess){
 			pos = new List<Vector3>();
 			uv = new List<Vector3>();
 			normal = new List<Vector3>();
@@ -145,9 +145,9 @@ namespace RailTypePSMEngine.Asset{
 				tmpModel.indices = new ushort[indiciess.Length];
 				Array.Copy(indiciess, tmpModel.indices, indiciess.Length);
 			}
-			if(verticiess != null){
-				tmpModel.verticies = new float[verticiess.Length];
-				Array.Copy(verticiess, tmpModel.verticies, verticiess.Length);
+			if(verticess != null){
+				tmpModel.vertices = new float[verticess.Length];
+				Array.Copy(verticess, tmpModel.vertices, verticess.Length);
 			}
 			if(uvss != null){
 				tmpModel.uv = new UShort2N[uvss.Length];
@@ -161,7 +161,7 @@ namespace RailTypePSMEngine.Asset{
 		}
 		
 		public void PutModelVertexIntoArray(ref float[] input, int position){
-			Array.Copy(models[0].verticies, 0, input, position, models[0].verticies.Length); 
+			Array.Copy(models[0].vertices, 0, input, position, models[0].vertices.Length); 
 		}
 		
 		public void PutModelUVIntoArray(ref UShort2N[] input, int position){
@@ -172,50 +172,50 @@ namespace RailTypePSMEngine.Asset{
 			Array.Copy(models[0].indices, 0, input, position, models[0].indices.Length);	
 		}
 		
-		public void MakeCircle(int totalOutsideVerticies){
+		public void MakeCircle(int totalOutsidevertices){
 			models.Add(new Model());
-			models[0].verticies = new float[((totalOutsideVerticies) + 2) * 3];
-			models[0].uv = new UShort2N[(models[0].verticies.Length / 3)];
-			models[0].indices = new ushort[(totalOutsideVerticies) * 3];
-			models[0].verticies[0] = 0.0f;
-			models[0].verticies[1] = 0.0f;
-			models[0].verticies[2] = 0.0f;
-			float tmpFloatOne = (models[0].verticies[0] + 1.0f) * 0.5f;
-			float tmpFloatTwo = (models[0].verticies[1] + 1.0f) * 0.5f;
+			models[0].vertices = new float[((totalOutsidevertices) + 2) * 3];
+			models[0].uv = new UShort2N[(models[0].vertices.Length / 3)];
+			models[0].indices = new ushort[(totalOutsidevertices) * 3];
+			models[0].vertices[0] = 0.0f;
+			models[0].vertices[1] = 0.0f;
+			models[0].vertices[2] = 0.0f;
+			float tmpFloatOne = (models[0].vertices[0] + 1.0f) * 0.5f;
+			float tmpFloatTwo = (models[0].vertices[1] + 1.0f) * 0.5f;
 			models[0].uv[0] = new UShort2N(tmpFloatOne,tmpFloatTwo);
 			models[0].indices[0] = 0;
 			ushort currentIndicies = 2, previousIndicies = 1;
 			double rotation = 0.0f;
 			double x = Math.Cos(rotation);
 			double y = Math.Sin(rotation);
-			models[0].verticies[3] = (float)x;
-			models[0].verticies[4] = (float)y;
-			models[0].verticies[5] = 0.0f;			
-			tmpFloatOne = (-models[0].verticies[3] + 1.0f) * 0.5f;
-			tmpFloatTwo = (-models[0].verticies[4] + 1.0f) * 0.5f;
+			models[0].vertices[3] = (float)x;
+			models[0].vertices[4] = (float)y;
+			models[0].vertices[5] = 0.0f;			
+			tmpFloatOne = (-models[0].vertices[3] + 1.0f) * 0.5f;
+			tmpFloatTwo = (-models[0].vertices[4] + 1.0f) * 0.5f;
 			models[0].uv[1] = new UShort2N(tmpFloatOne,tmpFloatTwo);
 			models[0].indices[1] = previousIndicies;
-			rotation += (Math.PI * 2) / (double)totalOutsideVerticies;
+			rotation += (Math.PI * 2) / (double)totalOutsidevertices;
 			x = Math.Cos(rotation);
 			y = Math.Sin(rotation);
-			models[0].verticies[6] = (float)x;//current
-			models[0].verticies[7] = (float)y;
-			models[0].verticies[8] = 0.0f;
-			models[0].uv[2] = new UShort2N((-models[0].verticies[6] + 1.0f) * 0.5f,(-models[0].verticies[7] + 1.0f) * 0.5f);
+			models[0].vertices[6] = (float)x;//current
+			models[0].vertices[7] = (float)y;
+			models[0].vertices[8] = 0.0f;
+			models[0].uv[2] = new UShort2N((-models[0].vertices[6] + 1.0f) * 0.5f,(-models[0].vertices[7] + 1.0f) * 0.5f);
 			models[0].indices[2] = currentIndicies;
-			for(int i = 1; i < totalOutsideVerticies; i++){
+			for(int i = 1; i < totalOutsidevertices; i++){
 				previousIndicies++;
 				currentIndicies++;
 				models[0].indices[(i * 3)] = 0;
 				models[0].indices[(i * 3) + 1] = previousIndicies;
-				rotation += (Math.PI * 2) / (double)totalOutsideVerticies;
+				rotation += (Math.PI * 2) / (double)totalOutsidevertices;
 				x = Math.Cos(rotation);
 				y = Math.Sin(rotation);
-				models[0].verticies[(i * 3) + 6] = (float)x; //current
-				models[0].verticies[(i * 3) + 7] = (float)y;
-				models[0].verticies[(i * 3) + 8] = 0.0f;				
-				models[0].uv[currentIndicies] = new UShort2N((-models[0].verticies[(i * 3) + 6] + 1.0f) * 0.5f,
-				                                             (-models[0].verticies[(i * 3) + 7] + 1.0f) * 0.5f);
+				models[0].vertices[(i * 3) + 6] = (float)x; //current
+				models[0].vertices[(i * 3) + 7] = (float)y;
+				models[0].vertices[(i * 3) + 8] = 0.0f;				
+				models[0].uv[currentIndicies] = new UShort2N((-models[0].vertices[(i * 3) + 6] + 1.0f) * 0.5f,
+				                                             (-models[0].vertices[(i * 3) + 7] + 1.0f) * 0.5f);
 				models[0].indices[(i * 3) + 2] = currentIndicies;
 			}
 			models[0].indices[models[0].indices.Length - 1] = 1;
@@ -225,7 +225,7 @@ namespace RailTypePSMEngine.Asset{
 	public class Model{
 		public string name;
 		public List<Vertex> _vertex;
-		public float[] verticies, normal;
+		public float[] vertices, normal;
 		public UShort2N[] uv;
 		public ushort[] indices;
 		public List<ushort> _indices;
@@ -239,13 +239,13 @@ namespace RailTypePSMEngine.Asset{
 		public void finalize(){
 			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 			sw.Start();
-			verticies = new float[_vertex.Count * 3];
+			vertices = new float[_vertex.Count * 3];
 			normal = new float[_vertex.Count * 3];
 			uv = new UShort2N[_vertex.Count];
 			for(int i = 0; i < _vertex.Count; i++){
-				verticies[(i * 3)] = _vertex[i].pos.X;
-				verticies[(i * 3) + 1] = _vertex[i].pos.Y;
-				verticies[(i * 3) + 2] = _vertex[i].pos.Z;
+				vertices[(i * 3)] = _vertex[i].pos.X;
+				vertices[(i * 3) + 1] = _vertex[i].pos.Y;
+				vertices[(i * 3) + 2] = _vertex[i].pos.Z;
 				normal[(i * 3)] = _vertex[i].normal.X;
 				normal[(i * 3) + 1] = _vertex[i].normal.Y;
 				normal[(i * 3) + 2] = _vertex[i].normal.Z;

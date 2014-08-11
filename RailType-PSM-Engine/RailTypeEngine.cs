@@ -29,6 +29,14 @@ namespace RailTypePSMEngine{
 			frameCounter.Start();
 		}
 		
+		public Thing this[int i]{
+			get{
+				Thing someThing;
+				_th.thingMap.TryGetValue(i,out someThing);
+				return someThing;
+			}
+		}
+		
 		public void Render(){
 			_gc.SetViewport(0, 0, _gc.Screen.Width, _gc.Screen.Height);
 			_gc.SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -53,7 +61,8 @@ namespace RailTypePSMEngine{
 			frameCount++;
 			if (frameCounter.ElapsedMilliseconds > 1000){	
 				System.Console.WriteLine("fps:{0:D}",frameCount);
-				System.Console.WriteLine("drawables:{0:D}",_th.GetTotalDrawableAmount());
+				_th.PrintInfo();
+				_gh.PrintInfo();
 				frameCount = 0;
 				frameCounter.Reset();
 				frameCounter.Start();

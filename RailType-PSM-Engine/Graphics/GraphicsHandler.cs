@@ -7,12 +7,13 @@ using RailTypePSMEngine.Asset;
 namespace RailTypePSMEngine.Graphics{
 	public class GraphicsHandler{
 		private GraphicsContext _gc;
-		//private Dictionary<int,ModelLocationData> _indexToModelLocationData;
+		private List<Thing> _thingsActive;
+		private List<ModelBufferLocation> _mblDisposed;
 		
 		private VertexBuffer _vb;
-		private ushort _indiciesIndex, _verticiesIndex;	
-		private int fragmentationIndiciesCount, totalIndiciesCount;
-		private int fragmentationVerticiesCount, totalVerticiesCount;
+		private ushort _indicesIndex, _verticesIndex;	
+		private int fragmentationIndicesCount, totalIndicesCount;
+		private int fragmentationVerticesCount, totalVerticesCount;
 		//private int[] activeTextureBuffers;
 		
 		public Matrix4 modelToWorld, cameraToWorld;
@@ -20,8 +21,9 @@ namespace RailTypePSMEngine.Graphics{
 		public GraphicsHandler(GraphicsContext gc){
 			_gc = gc;
 			_vb = new VertexBuffer(8192, 8192, new VertexFormat[]{VertexFormat.Float3, VertexFormat.UShort2N, VertexFormat.Float});
-			_indiciesIndex = _verticiesIndex = 0;
-			
+			_indicesIndex = _verticesIndex = 0;
+			_mblDisposed = new List<ModelBufferLocation>();
+			_thingsActive = new List<Thing>();
 //			cameraToProjection = Matrix4.Perspective(FMath.Radians(45.0f), gc.Screen.AspectRatio, 1f, 1000.0f);
 //			cameraToProjection = Matrix4.Identity;
 //			cameraToProjection *= Matrix4.Ortho(-_gc.Screen.AspectRatio, _gc.Screen.AspectRatio,
@@ -32,37 +34,59 @@ namespace RailTypePSMEngine.Graphics{
 		}
 
 		
-		public Primitive RequestPrimitive(Model model, int thingNumber){
-			Primitive outputPrimitive = new Primitive(DrawMode.Triangles,_indiciesIndex,(ushort)model.indices.Length,0);
+		public void Register(Thing inputThing){
+			Model model = inputThing.GetModel();
+			ushort[] indicestmp = new ushort[model.indices.Length];
+			
+			Primitive outputPrimitive = new Primitive(DrawMode.Triangles,_indicesIndex,(ushort)model.indices.Length,0);
+			
 			//SetIndicies
-			ushort[] indiciestmp = new ushort[model.indices.Length];
-			Array.Copy(model.indices,0,indiciestmp,0,model.indices.Length);
-			for(int i = 0; i < indiciestmp.Length;i++){
-				indiciestmp[i]+= _verticiesIndex;		
+			Array.Copy(model.indices,0,indicestmp,0,model.indices.Length);
+			for(int i = 0; i < indicestmp.Length;i++){
+				indicestmp[i]+= _verticesIndex;		
 			}
 			
-			_vb.SetIndices(indiciestmp,outputPrimitive.First,0,indiciestmp.Length);
-			
-			_indiciesIndex += (ushort)model.indices.Length;
-			
-			//SetVerticies
-			//Verticies
-			_vb.SetVertices(0,model.verticies,_verticiesIndex,0,model.verticies.Length/3);
-			//UVs
-			_vb.SetVertices(1,model.uv,_verticiesIndex,0,model.uv.Length);
-			//UniqueThingNumber
-			float[] theseNumbers = new float[model.verticies.Length/3];
-			float[] arrayFill = new float[1]{(float)thingNumber};
+			//Gotta do these regardless
+			float[] theseNumbers = new float[model.vertices.Length/3];
+			float[] arrayFill = new float[1]{(float)inputThing.globalNumber};
 			ArrayFillComplex<float>(ref theseNumbers,0,ref arrayFill,theseNumbers.Length);
-			//Fill Array with numbers
-			_vb.SetVertices(2,theseNumbers,_verticiesIndex,0,theseNumbers.Length);
 			
-			_verticiesIndex += (ushort)(model.verticies.Length/3);
-			return outputPrimitive;
+			_vb.SetIndices(indicestmp,outputPrimitive.First,0,indicestmp.Length);			
+			_vb.SetVertices(0,model.vertices,_verticesIndex,0,model.vertices.Length/3);			
+			_vb.SetVertices(1,model.uv,_verticesIndex,0,model.uv.Length);			
+			_vb.SetVertices(2,theseNumbers,_verticesIndex,0,theseNumbers.Length);
+		
+			inputThing.modelBufferLocation.prim = outputPrimitive;
+			inputThing.modelBufferLocation.verticesCount = model.vertices.Length/3;
+			inputThing.modelBufferLocation.verticesIndex = _verticesIndex;
+			
+			//only if on the end of buffer - section						
+			_indicesIndex += (ushort)model.indices.Length;
+			totalIndicesCount += model.indices.Length;
+			_verticesIndex += (ushort)(model.vertices.Length/3);
+			totalVerticesCount += model.vertices.Length/3;
+			
+			Console.WriteLine("Assigning new Thing:{0} - vertCount:{1:D}, vertIndex:{2:D}, IndIndex:{3:D}, IndCount:{4:D}",
+			                  inputThing.globalNumber,
+			                  inputThing.modelBufferLocation.verticesCount,
+			                  inputThing.modelBufferLocation.verticesIndex,
+			                  inputThing.modelBufferLocation.prim.First,
+			                  inputThing.modelBufferLocation.prim.Count
+			                  		);
 		}
 		
-		public void ReleasePrimitive(Primitive inputLocation){
-			
+		public void PrintInfo(){
+			Console.WriteLine("TotalAdded-Vertices:{0:D},Indicies:{1:D}",totalVerticesCount,totalIndicesCount);                              
+			Console.WriteLine("Fragmented-Vertices:{0:D},Indicies:{1:D}",fragmentationVerticesCount,fragmentationIndicesCount); 
+       	}
+		
+		public void Release(Thing inputThing){
+			_thingsActive.Remove(inputThing);
+			_mblDisposed.Add(inputThing.modelBufferLocation);
+			fragmentationIndicesCount += inputThing.modelBufferLocation.prim.Count;
+			fragmentationVerticesCount += inputThing.modelBufferLocation.verticesCount;
+			totalIndicesCount -= inputThing.modelBufferLocation.prim.Count;
+			totalVerticesCount -= inputThing.modelBufferLocation.verticesCount;
 		}
 		
 		public void SetCameraToWorld(Matrix4 cameraToWorld_){

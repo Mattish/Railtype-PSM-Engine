@@ -7,16 +7,15 @@ using RailTypePSMEngine.Entity;
 
 namespace RailTypePSMEngine{
 	public class Thing : IEquatable<Thing>{
-		private Model model;
+		private Model _model;
 		
 		public static ThingHandler parentThingHandler;
-		public static GraphicsHandler parentGraphicsHandler;
 		
 		public float[] scalexyzrot;
 		public Tuple<int,int> shaderTextureNo;
 		public Matrix4 modelToWorld;
 		public bool draw, disposable, dirtyMatrix;
-		public Primitive prim;
+		public ModelBufferLocation modelBufferLocation;
 		public int globalNumber;
 		public static int thingNumberCounter = 0;
 
@@ -29,16 +28,12 @@ namespace RailTypePSMEngine{
 				shaderTextureNo = new Tuple<int, int>(0,0);
 			
 			globalNumber = Thing.thingNumberCounter++;
-			parentThingHandler.AddThing(this);	
-		}
-		
-		~Thing(){
-			parentGraphicsHandler.ReleasePrimitive(prim);
+			parentThingHandler.AddThing(this);
+			modelBufferLocation = new ModelBufferLocation();
 		}
 		
 		public Thing(Model model_) : this(){
-			model = model_;
-			prim = parentGraphicsHandler.RequestPrimitive(model,globalNumber);
+			_model = model_;
 		}
 		
 		public virtual void Update(){
@@ -47,6 +42,10 @@ namespace RailTypePSMEngine{
 		
 		public void Destroy(){
 			disposable = true;
+		}
+		
+		public Model GetModel(){
+			return _model;	
 		}
 		
 		public bool Equals(Thing inputThing){

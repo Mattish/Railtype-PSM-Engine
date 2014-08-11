@@ -10,20 +10,21 @@ namespace RailTypePSMEngine.Entity{
 		
 		private int _totalAmount;
 		private int _totalDrawableAmount;
-		//private GraphicsHandler _gh;
+		private GraphicsHandler _gh;
 		
 		// shaderNo, textureNo
 		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMap;
 		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMapPerUpdate;
+		private Queue<Thing> _thingsToAdd;
 		public Dictionary<int,Thing> thingMap;
 		
 		public ThingHandler(GraphicsHandler gh){
-			//_gh = gh;
+			_gh = gh;
 			Thing.parentThingHandler = this;
-			Thing.parentGraphicsHandler = gh;
 			_batchedMap = new Dictionary<Tuple<int, int>, List<Thing>>();
 			_batchedMapPerUpdate = new Dictionary<Tuple<int, int>, List<Thing>>();
 			thingMap = new Dictionary<int, Thing>();
+			_thingsToAdd = new Queue<Thing>();
 			_totalAmount = _totalDrawableAmount = 0;	
 		}
 		
@@ -43,7 +44,7 @@ namespace RailTypePSMEngine.Entity{
 			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMapPerUpdate){
 				int thingCounter = 0;
 				foreach(Thing thg in entry.Value){
-					prims[thingIndex+thingCounter] = thg.prim;
+					prims[thingIndex+thingCounter] = thg.modelBufferLocation.prim;
 					matricies[thingIndex+thingCounter] = thg.modelToWorld;
 					thingNumbers[thingIndex+thingCounter] = thg.globalNumber;
 					thingCounter++;
@@ -64,6 +65,10 @@ namespace RailTypePSMEngine.Entity{
 		}
 		
 		public void AddThing(Thing thg){
+			_thingsToAdd.Enqueue(thg);	
+		}
+		
+		public void _AddThing(Thing thg){
 			if (!_batchedMap.ContainsKey(thg.shaderTextureNo)){
 				_batchedMap[thg.shaderTextureNo] = new List<Thing>(1);
 				_batchedMap[thg.shaderTextureNo].Add(thg);
@@ -72,10 +77,17 @@ namespace RailTypePSMEngine.Entity{
 				_batchedMap[thg.shaderTextureNo].Add(thg);
 			}
 			thingMap.Add(thg.globalNumber,thg);
+			_gh.Register(thg);
 			_totalAmount++;
 		}
 		
+		public void PrintInfo(){
+			System.Console.WriteLine("drawables:{0:D}",_totalDrawableAmount);	
+		}
+		
 		public void Update(){
+			if (_thingsToAdd.Count > 0)
+				_AddThing(_thingsToAdd.Dequeue());
 			_batchedMapPerUpdate.Clear();
 			_totalDrawableAmount = 0;
 			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMap){
@@ -92,14 +104,11 @@ namespace RailTypePSMEngine.Entity{
 					else{ // Remove the disposable Thing
 						entry.Value.RemoveAt(i);
 						thingMap.Remove(someThing.globalNumber);
+						_gh.Release(someThing);
 						i--;
 					}
 				}
 			}
-		}
-		
-		public int GetTotalDrawableAmount(){
-			return _totalDrawableAmount;	
 		}
 	}
 	
