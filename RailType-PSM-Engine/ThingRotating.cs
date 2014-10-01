@@ -4,19 +4,19 @@ using RailTypePSMEngine.Asset;
 namespace RailTypePSMEngine{
 	public class ThingRotating : Thing{
 		
-		private float randomFloat;
+		private readonly float _randomFloat;
 		private static Random _r;
-		public ThingRotating(Model model_) : base(model_){
+		public ThingRotating(Model model) : base(model){
 			if (_r == null)
 				_r = new Random();
-			randomFloat = (float)_r.NextDouble();
-			randomFloat /= 10;
+			_randomFloat = (float)_r.NextDouble();
+			_randomFloat /= 10;
 		}
 		
 		public override void Update(){
-			scalexyzrot[4] += randomFloat;
-			scalexyzrot[5] += randomFloat;
-			dirtyMatrix = true;
+			Scalexyzrot[4] += _randomFloat;
+			Scalexyzrot[5] += _randomFloat;
+			ForceDirty();
 			base.Update();
 		}
 	}

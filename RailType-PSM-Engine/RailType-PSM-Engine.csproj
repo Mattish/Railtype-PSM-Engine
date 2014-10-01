@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AD2D7CB5-0B8B-4A0E-8FFC-BBC38D1E2273}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>RailTypePSMEngine</RootNamespace>
+    <AssemblyName>RailType-PSM-EngineNew</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="Sce.PlayStation.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppMain.cs" />
+    <Compile Include="RailTypeEngine.cs" />
+    <Compile Include="Thing.cs" />
+    <Compile Include="ThingRotating.cs" />
+    <Compile Include="Entity\ThingHandler.cs" />
+    <Compile Include="Asset\Asset.cs" />
+    <Compile Include="Asset\AssetHandler.cs" />
+    <Compile Include="Asset\WaveFrontObject.cs" />
+    <Compile Include="Graphics\GraphicsHandler.cs" />
+    <Compile Include="Graphics\ModelLocationData.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ShaderProgram Include="shaders\Simple.fcg" />
+    <ShaderProgram Include="shaders\Simple.vcg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PsmMetadata Include="app.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Sce\Sce.Psm.CSharp.targets" />
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="objects\square.obj" />
+    <Content Include="objects\cube.obj" />
+    <Content Include="images\duck.png" />
+    <Content Include="images\marisa.png" />
+    <Content Include="images\railgun.png" />
+    <Content Include="images\skybox.png" />
+    <Content Include="images\squareborder.png" />
+    <Content Include="images\test.png" />
+    <Content Include="images\uiharu.png" />
+  </ItemGroup>
+</Project>

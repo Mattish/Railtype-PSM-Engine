@@ -1,6 +1,5 @@
 using System;
 using Sce.PlayStation.Core.Graphics;
-using Sce.PlayStation.Core.Environment;
 using Sce.PlayStation.Core;
 using System.Diagnostics;
 using RailTypePSMEngine.Entity;
@@ -9,73 +8,71 @@ using RailTypePSMEngine.Asset;
 
 namespace RailTypePSMEngine{
 	public class RailTypeEngine{
-		GraphicsContext _gc;
+		GraphicsContext _graphicsContext;
 		public static Matrix4 cameraToWorld;
-		int frameCount;
-		int totalFrameCount;
-		Stopwatch frameCounter;
-		private ThingHandler _th;
-		private GraphicsHandler _gh;
+		int _frameCount;
+		int _totalFrameCount;
+		Stopwatch _stopwatch;
+		private ThingHandler _thingHandler;
+		private GraphicsHandler _graphicsHandler;
 		
-		public RailTypeEngine(GraphicsContext gc){
-			_gc = gc;
-			_gh = new GraphicsHandler(gc);
-			_th = new ThingHandler(_gh);			
+		public RailTypeEngine(GraphicsContext graphicsContext){
+			_graphicsContext = graphicsContext;
+			_graphicsHandler = new GraphicsHandler(graphicsContext);
+			_thingHandler = new ThingHandler(_graphicsHandler);			
 			AssetHandler.Init();
-			frameCount = 0;
-			frameCounter = new Stopwatch();
-			totalFrameCount = 0;
+			_frameCount = 0;
+			_stopwatch = new Stopwatch();
+			_totalFrameCount = 0;
 			cameraToWorld = Matrix4.Identity;
-			frameCounter.Start();
+			_stopwatch.Start();
 		}
 		
-		public Thing this[int i]{
+		public IThing this[int i]{
 			get{
-				Thing someThing;
-				_th.thingMap.TryGetValue(i,out someThing);
+				IThing someThing;
+				_thingHandler.thingMap.TryGetValue(i,out someThing);
 				return someThing;
 			}
 		}
 		
 		public void Render(){
-			_gc.SetViewport(0, 0, _gc.Screen.Width, _gc.Screen.Height);
-			_gc.SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			_gc.Clear();			
-			_gc.Enable(EnableMode.Blend);
-			//_gc.Enable(EnableMode.CullFace);
-			_gc.Enable(EnableMode.DepthTest);
-			_gc.SetBlendFunc(BlendFuncMode.Add, BlendFuncFactor.SrcAlpha, BlendFuncFactor.OneMinusSrcAlpha);
-			
-			
+			_graphicsContext.SetViewport(0, 0, _graphicsContext.Screen.Width, _graphicsContext.Screen.Height);
+			_graphicsContext.SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			_graphicsContext.Clear();			
+			_graphicsContext.Enable(EnableMode.Blend);
+			//_graphicsContext.Enable(EnableMode.CullFace);
+			_graphicsContext.Enable(EnableMode.DepthTest);
+			_graphicsContext.SetBlendFunc(BlendFuncMode.Add, BlendFuncFactor.SrcAlpha, BlendFuncFactor.OneMinusSrcAlpha);
 			
 			BatchInfo[] batchInfo;
 			Primitive[] batchPrims;
 			Matrix4[] batchMatricies;
 			int[] batchThingNumbers;
-			_th.TryGetBatchesOfThings(out batchInfo, out batchPrims, out batchMatricies, out batchThingNumbers);
+			_thingHandler.TryGetBatchesOfThings(out batchInfo, out batchPrims, out batchMatricies, out batchThingNumbers);
 			foreach(BatchInfo bi in batchInfo){
-				_gh.Draw(batchPrims, batchMatricies, batchThingNumbers, bi.index, bi.count,
-		                                     			bi.shaderNumber,bi.textureNumber);
+				_graphicsHandler.Draw(batchPrims, batchMatricies, batchThingNumbers, bi.Index, bi.Count,
+		                                     			bi.ShaderNumber,bi.TextureNumber);
 			}
-			_gc.SwapBuffers();
-			frameCount++;
-			if (frameCounter.ElapsedMilliseconds > 1000){	
-				System.Console.WriteLine("fps:{0:D}",frameCount);
-				_th.PrintInfo();
-				_gh.PrintInfo();
-				frameCount = 0;
-				frameCounter.Reset();
-				frameCounter.Start();
+			_graphicsContext.SwapBuffers();
+			_frameCount++;
+			if (_stopwatch.ElapsedMilliseconds > 1000){	
+				Console.WriteLine("fps:{0:D}",_frameCount);
+				_thingHandler.PrintInfo();
+				_graphicsHandler.PrintInfo();
+				_frameCount = 0;
+				_stopwatch.Reset();
+				_stopwatch.Start();
 			}
-			totalFrameCount++;
+			_totalFrameCount++;
 		}
 		
 		public void Update(){
-			_th.Update();
+			_thingHandler.Update();
 		}
 
 		public int GetFrameNumber(){
-			return totalFrameCount;
+			return _totalFrameCount;
 		}
 	}
 }

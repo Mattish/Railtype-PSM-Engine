@@ -6,7 +6,6 @@ fonts
 *.user
 *.suo
 *.vsp
-*.csproj
 *.vbproj
 *.cache
 TestResults

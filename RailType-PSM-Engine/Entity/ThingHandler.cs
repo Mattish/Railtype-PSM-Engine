@@ -1,36 +1,35 @@
 using System;
 using System.Collections.Generic;
-
 using Sce.PlayStation.Core;
 using Sce.PlayStation.Core.Graphics;
 using RailTypePSMEngine.Graphics;
 
 namespace RailTypePSMEngine.Entity{
 	public class ThingHandler{
-		
-		private int _totalAmount;
-		private int _totalDrawableAmount;
+	    private int _totalDrawableAmount;
 		private GraphicsHandler _gh;
 		
 		// shaderNo, textureNo
-		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMap;
-		private Dictionary<Tuple<int,int>,List<Thing>> _batchedMapPerUpdate;
-		private Queue<Thing> _thingsToAdd;
-		public Dictionary<int,Thing> thingMap;
+		private Dictionary<Tuple<int,int>,List<IThing>> _batchedMap;
+		private Dictionary<Tuple<int,int>,List<IThing>> _batchedMapPerUpdate;
+		private Queue<IThing> _thingsToAdd;
+		public Dictionary<int,IThing> thingMap;
 		
 		public ThingHandler(GraphicsHandler gh){
 			_gh = gh;
-			Thing.parentThingHandler = this;
-			_batchedMap = new Dictionary<Tuple<int, int>, List<Thing>>();
-			_batchedMapPerUpdate = new Dictionary<Tuple<int, int>, List<Thing>>();
-			thingMap = new Dictionary<int, Thing>();
-			_thingsToAdd = new Queue<Thing>();
-			_totalAmount = _totalDrawableAmount = 0;	
+			Thing.ParentThingHandler = this;
+			_batchedMap = new Dictionary<Tuple<int, int>, List<IThing>>();
+			_batchedMapPerUpdate = new Dictionary<Tuple<int, int>, List<IThing>>();
+			thingMap = new Dictionary<int, IThing>();
+			_thingsToAdd = new Queue<IThing>();
+			TotalAmount = _totalDrawableAmount = 0;	
 		}
-		
-		public void TryGetBatchesOfThings(out BatchInfo[] bi, out Primitive[] prims, out Matrix4[] matricies, out int[] thingNumbers){
+
+	    public int TotalAmount { get; set; }
+
+	    public void TryGetBatchesOfThings(out BatchInfo[] bi, out Primitive[] prims, out Matrix4[] matricies, out int[] thingNumbers){
 			int amountOfBatches = 1;
-			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMapPerUpdate){
+			foreach(KeyValuePair<Tuple<int,int>,List<IThing>> entry in _batchedMapPerUpdate){
 				amountOfBatches += (int)Math.Ceiling((double)(entry.Value.Count/16));
 			}
 			
@@ -41,22 +40,22 @@ namespace RailTypePSMEngine.Entity{
 			
 			int thingIndex = 0;
 			int batchInfoIndex = 0;
-			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMapPerUpdate){
+			foreach(KeyValuePair<Tuple<int,int>,List<IThing>> entry in _batchedMapPerUpdate){
 				int thingCounter = 0;
 				foreach(Thing thg in entry.Value){
-					prims[thingIndex+thingCounter] = thg.modelBufferLocation.prim;
-					matricies[thingIndex+thingCounter] = thg.modelToWorld;
-					thingNumbers[thingIndex+thingCounter] = thg.globalNumber;
+					prims[thingIndex+thingCounter] = thg.ModelBufferLocation.prim;
+					matricies[thingIndex+thingCounter] = thg.ModelToWorld;
+					thingNumbers[thingIndex+thingCounter] = thg.GlobalNumber;
 					thingCounter++;
 				}
 				int AmountOfThings = 0;
 				int totalAmountOfThings = 0;
 				while(totalAmountOfThings < thingCounter){
 					AmountOfThings = (thingCounter-totalAmountOfThings) < 16 ? (thingCounter-totalAmountOfThings) : 16;
-					bi[batchInfoIndex] = new BatchInfo(){shaderNumber = entry.Key.Item1,
-														textureNumber = entry.Key.Item2,
-														count = AmountOfThings,
-														index = thingIndex+totalAmountOfThings};
+					bi[batchInfoIndex] = new BatchInfo(){ShaderNumber = entry.Key.Item1,
+														TextureNumber = entry.Key.Item2,
+														Count = AmountOfThings,
+														Index = thingIndex+totalAmountOfThings};
 					totalAmountOfThings += AmountOfThings;
 					batchInfoIndex++;
 				}
@@ -64,25 +63,24 @@ namespace RailTypePSMEngine.Entity{
 			}
 		}
 		
-		public void AddThing(Thing thg){
+		public void Register(IThing thg){
 			_thingsToAdd.Enqueue(thg);	
 		}
 		
-		public void _AddThing(Thing thg){
-			if (!_batchedMap.ContainsKey(thg.shaderTextureNo)){
-				_batchedMap[thg.shaderTextureNo] = new List<Thing>(1);
-				_batchedMap[thg.shaderTextureNo].Add(thg);
+		public void _AddThing(IThing thg){
+			if (!_batchedMap.ContainsKey(thg.ShaderTextureNo)){
+				_batchedMap[thg.ShaderTextureNo] = new List<IThing>(1);
+				_batchedMap[thg.ShaderTextureNo].Add(thg);
 			}
 			else{
-				_batchedMap[thg.shaderTextureNo].Add(thg);
+				_batchedMap[thg.ShaderTextureNo].Add(thg);
 			}
-			thingMap.Add(thg.globalNumber,thg);
-			_gh.Register(thg);
-			_totalAmount++;
+			thingMap.Add(thg.GlobalNumber,thg);
+			TotalAmount++;
 		}
 		
 		public void PrintInfo(){
-			System.Console.WriteLine("drawables:{0:D}",_totalDrawableAmount);	
+			Console.WriteLine("drawables:{0:D}",_totalDrawableAmount);	
 		}
 		
 		public void Update(){
@@ -90,21 +88,20 @@ namespace RailTypePSMEngine.Entity{
 				_AddThing(_thingsToAdd.Dequeue());
 			_batchedMapPerUpdate.Clear();
 			_totalDrawableAmount = 0;
-			foreach(KeyValuePair<Tuple<int,int>,List<Thing>> entry in _batchedMap){
-				_batchedMapPerUpdate.Add(entry.Key,new List<Thing>(1));
+			foreach(KeyValuePair<Tuple<int,int>,List<IThing>> entry in _batchedMap){
+				_batchedMapPerUpdate.Add(entry.Key,new List<IThing>(1));
 				for(int i = 0; i < entry.Value.Count; i++){
-					Thing someThing = entry.Value[i];
-					if (!someThing.disposable){ // update the alive Thing
+					IThing someThing = entry.Value[i];
+					if (!someThing.Disposable){ // update the alive Thing
 						someThing.Update();
-						if (someThing.draw){
-							_batchedMapPerUpdate[someThing.shaderTextureNo].Add(someThing);
+						if (someThing.Draw){
+							_batchedMapPerUpdate[someThing.ShaderTextureNo].Add(someThing);
 							_totalDrawableAmount++;
 						}
 					}
 					else{ // Remove the disposable Thing
 						entry.Value.RemoveAt(i);
-						thingMap.Remove(someThing.globalNumber);
-						_gh.Release(someThing);
+						thingMap.Remove(someThing.GlobalNumber);
 						i--;
 					}
 				}
@@ -113,10 +110,10 @@ namespace RailTypePSMEngine.Entity{
 	}
 	
 	public struct BatchInfo{
-		public int shaderNumber;	
-		public int textureNumber;
-		public int count;
-		public int index;
+		public int ShaderNumber;	
+		public int TextureNumber;
+		public int Count;
+		public int Index;
 	}
 }
 
