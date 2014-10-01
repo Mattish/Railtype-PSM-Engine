@@ -3,12 +3,8 @@ Railtype-PSM-Engine
 
 PSM 3D graphics engine aimed for Vita using the PSM SDK
 
-**>> Currently being re-written <<**
-
-
-![](http://tentaclenoises.co.uk/github/newexample.jpg)
-
-_coloured cubes spiraling to create a wonderful tunnel_
+Do not expect this project to be actively updated, but I will complete it at some point.
+I am in the process of wanting to redesign and currently working out domains
 
 -------------------
 
