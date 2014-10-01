@@ -32,12 +32,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Sce.PlayStation.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppMain.cs" />
+    <Compile Include="Entity\BatchInfo.cs" />
     <Compile Include="Entity\GraphicThing.cs" />
     <Compile Include="Entity\IDrawable.cs" />
     <Compile Include="Entity\INumberedThing.cs" />

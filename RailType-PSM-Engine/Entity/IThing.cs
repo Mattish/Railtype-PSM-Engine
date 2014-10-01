@@ -1,9 +1,8 @@
 using System;
 using Sce.PlayStation.Core;
 
-namespace RailTypePSMEngine.Entity
-{
-    public interface IThing : IEquatable<IThing>, IDisposable, INumberedThing, IDrawable {
+namespace RailTypePSMEngine.Entity{
+    public interface IThing : IEquatable<IThing>, IDisposable, INumberedThing, IDrawable{
         float[] Scalexyzrot { get; }
         Matrix4 ModelToWorld { get; }
         bool Disposable { get; }
