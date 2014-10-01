@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RailTypePSMEngine.Entity;
 using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core;
 using RailTypePSMEngine.Asset;

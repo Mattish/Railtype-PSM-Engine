@@ -1,7 +1,7 @@
 using System;
 using RailTypePSMEngine.Asset;
 
-namespace RailTypePSMEngine{
+namespace RailTypePSMEngine.Entity{
 	public class ThingRotating : Thing{
 		
 		private readonly float _randomFloat;

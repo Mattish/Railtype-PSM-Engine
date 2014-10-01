@@ -38,9 +38,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppMain.cs" />
+    <Compile Include="Entity\GraphicThing.cs" />
+    <Compile Include="Entity\IDrawable.cs" />
+    <Compile Include="Entity\INumberedThing.cs" />
+    <Compile Include="Entity\IThing.cs" />
     <Compile Include="RailTypeEngine.cs" />
-    <Compile Include="Thing.cs" />
-    <Compile Include="ThingRotating.cs" />
+    <Compile Include="Entity\Thing.cs" />
+    <Compile Include="Entity\ThingRotating.cs" />
     <Compile Include="Entity\ThingHandler.cs" />
     <Compile Include="Asset\Asset.cs" />
     <Compile Include="Asset\AssetHandler.cs" />

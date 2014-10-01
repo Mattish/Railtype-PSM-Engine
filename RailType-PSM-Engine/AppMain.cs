@@ -1,4 +1,5 @@
 using System;
+using RailTypePSMEngine.Entity;
 using Sce.PlayStation.Core.Environment;
 using Sce.PlayStation.Core.Graphics;
 using Sce.PlayStation.Core.Input;
