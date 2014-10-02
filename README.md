@@ -6,6 +6,8 @@ PSM 3D graphics engine aimed for Vita using the PSM SDK
 Do not expect this project to be actively updated, but I will complete it at some point.
 I am in the process of wanting to redesign and currently working out domains
 
+One project file is for Visual studio and one is for their PSM studio as they are not compatible.
+
 -------------------
 
 The SDK on vita currently has **massive** timesink for gfx calls as well as **very** slow CPU vector processing compared to other PSM devices. Probably due to the vm that is being used on the vita.
