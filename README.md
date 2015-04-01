@@ -1,6 +1,9 @@
 Railtype-PSM-Engine
 ===================
 
+**PlayStation Mobile is being discontinued**
+===========================================
+
 PSM 3D graphics engine aimed for Vita using the PSM SDK
 
 Do not expect this project to be actively updated, but I will complete it at some point.
